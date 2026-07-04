@@ -1,71 +1,277 @@
-const ICONS = {
-  overview: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>`,
-  profile: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 4.5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>`,
-  servers: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><circle cx="7" cy="7" r="0.8" fill="currentColor" stroke="none"/><circle cx="7" cy="17" r="0.8" fill="currentColor" stroke="none"/></svg>`,
-  automation: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke-linejoin="round"/></svg>`,
-  logs: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7M9 8h3"/></svg>`,
-  settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l2-1.5-2-3.4-2.4.7a8.06 8.06 0 0 0-1.7-1L15 3h-4l-.3 2.4a8.06 8.06 0 0 0-1.7 1l-2.4-.7-2 3.4L6.6 11a7.97 7.97 0 0 0 0 2l-2 1.5 2 3.4 2.4-.7a8.06 8.06 0 0 0 1.7 1L11 21h4l.3-2.4a8.06 8.06 0 0 0 1.7-1l2.4.7 2-3.4-2-1.6Z"/></svg>`,
-  logout: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>`,
-};
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="dash">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">P</div>
+        <div class="brand-name">Panel</div>
+      </div>
 
-function applyIcons() {
-  document.querySelectorAll("[data-icon]").forEach((el) => {
-    el.innerHTML = ICONS[el.dataset.icon] || "";
-  });
-}
+      <div class="nav-group-label">Main</div>
+      <div class="nav-item active" data-target="overview">
+        <span data-icon="overview"></span><span>Overview</span>
+      </div>
+      <div class="nav-item" data-target="profile">
+        <span data-icon="profile"></span><span>Profile</span>
+      </div>
+      <div class="nav-item" data-target="map">
+        <span data-icon="servers"></span><span>Map</span>
+      </div>
+      <div class="nav-item" data-target="account">
+        <span data-icon="profile"></span><span>Account</span>
+      </div>
+      <div class="nav-item" data-target="social">
+        <span data-icon="automation"></span><span>Social</span>
+      </div>
 
-function showToast(message) {
-  const toast = document.getElementById("toast");
-  toast.textContent = message;
-  toast.classList.add("show");
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(() => toast.classList.remove("show"), 1800);
-}
+      <div class="nav-group-label">Manage</div>
+      <div class="nav-item" data-target="automation">
+        <span data-icon="automation"></span><span>Automation</span>
+      </div>
+      <div class="nav-item" data-target="logs">
+        <span data-icon="logs"></span><span>Logs</span>
+      </div>
+      <div class="nav-item" data-target="settings">
+        <span data-icon="settings"></span><span>Settings</span>
+      </div>
 
-function loadProfile() {
-  const params = new URLSearchParams(window.location.search);
-  const username = params.get("username");
+      <div class="sidebar-foot">
+        <div class="nav-item logout-item" id="logout-item">
+          <span data-icon="logout"></span><span>Log out</span>
+        </div>
+      </div>
+    </aside>
 
-  if (!username) {
-    // No profile in the URL — nobody's actually logged in. Bounce back.
-    window.location.href = "index.html";
-    return;
-  }
+    <main class="main">
+      <div class="topbar">
+        <h2 id="panel-title">Overview</h2>
+        <div class="user-chip">
+          <img id="chip-avatar" src="" alt="Your avatar" />
+          <div>
+            <div class="name" id="chip-name">—</div>
+            <div class="tag" id="chip-tag">—</div>
+          </div>
+        </div>
+      </div>
 
-  const handle = params.get("handle") || username;
-  const avatar = params.get("avatar") || "https://cdn.discordapp.com/embed/avatars/0.png";
+      <div class="content">
 
-  document.getElementById("chip-avatar").src = avatar;
-  document.getElementById("chip-name").textContent = username;
-  document.getElementById("chip-tag").textContent = "@" + handle;
-  document.getElementById("hello-name").textContent = username;
-}
+        <!-- Overview -->
+        <section class="tab-panel active" id="panel-overview">
+          <div class="hello">
+            <div class="eyebrow">Welcome back</div>
+            <h1 id="hello-name">—</h1>
+            <p>Here's a snapshot of your panel. Everything below is a placeholder for now.</p>
+          </div>
 
-function wireNav() {
-  const items = document.querySelectorAll(".nav-item[data-tab]");
-  items.forEach((item) => {
-    item.addEventListener("click", () => {
-      items.forEach((i) => i.classList.remove("active"));
-      item.classList.add("active");
-      document.getElementById("panel-title").textContent = item.dataset.label;
-      showToast(`${item.dataset.label} — nothing wired up here yet`);
-    });
-  });
-}
+          <div class="grid">
+            <div class="stat-card">
+              <div class="label">Connected servers</div>
+              <div class="value violet">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Active automations</div>
+              <div class="value cyan">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Events logged</div>
+              <div class="value">0</div>
+            </div>
+          </div>
 
-function wireButtons() {
-  document.querySelectorAll(".btn[data-inert]").forEach((btn) => {
-    btn.addEventListener("click", () => showToast("This button doesn't do anything yet"));
-  });
+          <div class="panel">
+            <h3>Quick actions</h3>
+            <p class="desc">These aren't wired up to anything yet — just placeholders for now.</p>
+            <div class="action-row">
+              <button class="btn primary" data-inert>Add a server</button>
+              <button class="btn" data-inert>Create automation</button>
+              <button class="btn" data-inert>View logs</button>
+              <button class="btn danger" data-inert>Reset panel</button>
+            </div>
+          </div>
 
-  document.getElementById("logout-item").addEventListener("click", () => {
-    window.location.href = "index.html";
-  });
-}
+          <div class="panel">
+            <h3>Recent activity</h3>
+            <p class="desc">Nothing here yet — this will fill in once things are connected.</p>
+          </div>
+        </section>
 
-document.addEventListener("DOMContentLoaded", () => {
-  applyIcons();
-  loadProfile();
-  wireNav();
-  wireButtons();
-});
+        <!-- Profile -->
+        <section class="tab-panel" id="panel-profile">
+          <div class="hello">
+            <div class="eyebrow">Profile</div>
+            <h1>Your Discord identity</h1>
+            <p>Pulled straight from Discord when you signed in.</p>
+          </div>
+          <div class="panel account-card">
+            <img id="profile-avatar" src="" alt="Avatar" />
+            <div>
+              <div class="name" id="profile-name">—</div>
+              <div class="handle" id="profile-handle">—</div>
+              <div class="id-row"><span class="id-pill" id="profile-id">—</span></div>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Roles &amp; badges</h3>
+            <p class="desc">Not connected to anything yet — this is just a placeholder for later.</p>
+          </div>
+        </section>
+
+        <!-- Map -->
+        <section class="tab-panel" id="panel-map">
+          <div class="hello">
+            <div class="eyebrow">Network map</div>
+            <h1>Node overview</h1>
+            <p>Drag to pan, scroll (or use the buttons) to zoom. Purely visual for now.</p>
+          </div>
+          <div class="panel map-panel">
+            <div class="map-shell" id="map-shell">
+              <canvas id="map-canvas"></canvas>
+              <div class="map-controls">
+                <button class="map-btn" id="map-zoom-in" title="Zoom in">+</button>
+                <button class="map-btn" id="map-zoom-out" title="Zoom out">−</button>
+                <button class="map-btn" id="map-reset" title="Reset view">⤾</button>
+              </div>
+              <div class="map-hint">drag to pan · scroll to zoom</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Account -->
+        <section class="tab-panel" id="panel-account">
+          <div class="hello">
+            <div class="eyebrow">Account</div>
+            <h1>Manage your account</h1>
+            <p>A few things you can actually do right now.</p>
+          </div>
+
+          <div class="panel account-card">
+            <img id="account-avatar" src="" alt="Avatar" />
+            <div>
+              <div class="name" id="account-name">—</div>
+              <div class="handle" id="account-handle">—</div>
+              <div class="id-row">
+                <span class="id-pill" id="account-id">—</span>
+                <button class="btn" id="copy-id-btn">Copy ID</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Display name override</h3>
+            <p class="desc">Changes how your name shows across the panel. Local to this session only.</p>
+            <div class="input-row">
+              <input type="text" class="text-input" id="nickname-input" placeholder="Enter a display name" />
+              <button class="btn primary" id="nickname-apply">Apply</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Session</h3>
+            <p class="desc">Signs you out and sends you back to the login page.</p>
+            <div class="action-row">
+              <button class="btn danger" id="account-logout-btn">Log out</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Social -->
+        <section class="tab-panel" id="panel-social">
+          <div class="hello">
+            <div class="eyebrow">Social</div>
+            <h1>Find us elsewhere</h1>
+            <p>Links to where people can reach the community.</p>
+          </div>
+
+          <div class="panel social-card">
+            <div class="social-icon" data-icon="discord-mark"></div>
+            <div>
+              <div class="name" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;">Discord server</div>
+              <div class="handle" style="margin-bottom:12px;">Join to chat, get updates, and ask questions.</div>
+              <a class="join-btn" href="https://discord.gg/ud48XJHepX" target="_blank" rel="noopener">Join server</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Automation -->
+        <section class="tab-panel" id="panel-automation">
+          <div class="hello">
+            <div class="eyebrow">Automation</div>
+            <h1>Automations</h1>
+            <p>Nothing set up yet.</p>
+          </div>
+          <div class="panel">
+            <h3>Create an automation</h3>
+            <p class="desc">Not wired up yet — placeholder for now.</p>
+            <div class="action-row">
+              <button class="btn primary" data-inert>New automation</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Logs -->
+        <section class="tab-panel" id="panel-logs">
+          <div class="hello">
+            <div class="eyebrow">Logs</div>
+            <h1>Activity logs</h1>
+            <p>Nothing has been logged yet.</p>
+          </div>
+          <div class="panel">
+            <p class="desc">Once things are connected, events will show up here.</p>
+          </div>
+        </section>
+
+        <!-- Settings -->
+        <section class="tab-panel" id="panel-settings">
+          <div class="hello">
+            <div class="eyebrow">Settings</div>
+            <h1>Panel settings</h1>
+            <p>These actually work — try them out.</p>
+          </div>
+
+          <div class="panel">
+            <h3>Accent color</h3>
+            <p class="desc">Changes the highlight color used across the panel.</p>
+            <div class="swatch-row">
+              <div class="swatch selected" style="background:#7c5cfc" data-color="#7c5cfc" title="Violet"></div>
+              <div class="swatch" style="background:#4ce0d2" data-color="#4ce0d2" title="Cyan"></div>
+              <div class="swatch" style="background:#ff6b6b" data-color="#ff6b6b" title="Red"></div>
+              <div class="swatch" style="background:#ffb84d" data-color="#ffb84d" title="Amber"></div>
+              <div class="swatch" style="background:#4dff88" data-color="#4dff88" title="Green"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="field-row">
+              <div>
+                <div class="field-label">Compact sidebar</div>
+                <div class="field-desc">Collapse the sidebar to icons only.</div>
+              </div>
+              <div class="switch" id="toggle-compact"></div>
+            </div>
+            <div class="field-row">
+              <div>
+                <div class="field-label">Reduce motion</div>
+                <div class="field-desc">Turns off hover and transition animations.</div>
+              </div>
+              <div class="switch" id="toggle-motion"></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
