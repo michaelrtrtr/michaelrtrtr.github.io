@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="dash">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">P</div>
+        <div class="brand-name">Panel</div>
+      </div>
+
+      <div class="nav-group-label">Main</div>
+      <div class="nav-item active" data-tab data-label="Overview">
+        <span data-icon="overview"></span> Overview
+      </div>
+      <div class="nav-item" data-tab data-label="Profile">
+        <span data-icon="profile"></span> Profile
+      </div>
+      <div class="nav-item" data-tab data-label="Servers">
+        <span data-icon="servers"></span> Servers
+      </div>
+
+      <div class="nav-group-label">Manage</div>
+      <div class="nav-item" data-tab data-label="Automation">
+        <span data-icon="automation"></span> Automation
+      </div>
+      <div class="nav-item" data-tab data-label="Logs">
+        <span data-icon="logs"></span> Logs
+      </div>
+      <div class="nav-item" data-tab data-label="Settings">
+        <span data-icon="settings"></span> Settings
+      </div>
+
+      <div class="sidebar-foot">
+        <div class="nav-item logout-item" id="logout-item">
+          <span data-icon="logout"></span> Log out
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <h2 id="panel-title">Overview</h2>
+        <div class="user-chip">
+          <img id="chip-avatar" src="" alt="Your avatar" />
+          <div>
+            <div class="name" id="chip-name">—</div>
+            <div class="tag" id="chip-tag">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="hello">
+          <div class="eyebrow">Welcome back</div>
+          <h1 id="hello-name">—</h1>
+          <p>Here's a snapshot of your panel. Everything below is a placeholder for now.</p>
+        </div>
+
+        <div class="grid">
+          <div class="stat-card">
+            <div class="label">Connected servers</div>
+            <div class="value violet">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Active automations</div>
+            <div class="value cyan">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Events logged</div>
+            <div class="value">0</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Quick actions</h3>
+          <p class="desc">These aren't wired up to anything yet — just placeholders for now.</p>
+          <div class="action-row">
+            <button class="btn primary" data-inert>Add a server</button>
+            <button class="btn" data-inert>Create automation</button>
+            <button class="btn" data-inert>View logs</button>
+            <button class="btn danger" data-inert>Reset panel</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Recent activity</h3>
+          <p class="desc">Nothing here yet — this will fill in once things are connected.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
