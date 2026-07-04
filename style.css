@@ -625,14 +625,29 @@ body.motion-off * {
   overflow: hidden;
 }
 
-.map-shell canvas {
-  display: block;
+.map-shell canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.map-shell canvas.grabbing { cursor: grabbing; }
+
+#map-leaflet {
   width: 100%;
   height: 100%;
-  cursor: grab;
+  background: #060810;
 }
 
-.map-shell canvas.grabbing { cursor: grabbing; }
+.leaflet-control-zoom { display: none; }
+
+.leaflet-container {
+  background: #060810;
+  font-family: 'Inter', sans-serif;
+}
+
+.leaflet-control-attribution {
+  background: rgba(18, 21, 31, 0.85) !important;
+  color: var(--muted) !important;
+  font-size: 10.5px !important;
+}
+
+.leaflet-control-attribution a { color: var(--cyan) !important; }
 
 .map-controls {
   position: absolute;
