@@ -6,7 +6,7 @@
 // 4. That's it — no client secret or backend needed for this flow.
 
 const DISCORD_CONFIG = {
-  clientId: "1511177342423138415",
+  clientId: "1510808228810981467",
   // Fixed on purpose — this must be the EXACT string you add under
   // OAuth2 > Redirects in the Discord Developer Portal. Don't let it
   // auto-detect the URL, or "www vs no-www" / trailing-slash mismatches
