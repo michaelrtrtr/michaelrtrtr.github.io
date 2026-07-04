@@ -7,8 +7,10 @@
 
 const DISCORD_CONFIG = {
   clientId: "1510808228810981467",
-  // Auto-matches whatever URL this page is actually running on,
-  // so it works both locally and once you publish it.
-  redirectUri: window.location.origin + window.location.pathname,
+  // Fixed on purpose — this must be the EXACT string you add under
+  // OAuth2 > Redirects in the Discord Developer Portal. Don't let it
+  // auto-detect the URL, or "www vs no-www" / trailing-slash mismatches
+  // will randomly break login.
+  redirectUri: "https://michaelrtrtr.github.io/",
   scope: "identify",
 };
