@@ -728,6 +728,48 @@ body.motion-off * {
   z-index: 2;
 }
 
+.build-log {
+  background: #060810;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  min-height: 120px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.build-log-line { color: var(--text); }
+.build-log-line.muted { color: var(--muted); }
+.build-log-line.ok { color: var(--cyan); }
+.build-log-line.done { color: #4dff88; font-weight: 600; }
+
+.run-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  text-align: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text);
+  background: linear-gradient(90deg, rgba(124,92,252,0.9), rgba(76,224,210,0.9));
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.run-banner.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
 @media (max-width: 760px) {
   .sidebar { display: none; }
   .content { padding: 18px; }
