@@ -94,13 +94,18 @@ a { color: inherit; }
   font-weight: 700;
   font-size: 15px;
   color: #0a0c14;
+  box-shadow: 0 0 18px rgba(124, 92, 252, 0.55);
 }
 
 .brand-name {
   font-family: 'Space Grotesk', sans-serif;
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 16px;
   letter-spacing: 0.02em;
+  background: linear-gradient(90deg, var(--violet), var(--cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .eyebrow {
@@ -178,12 +183,41 @@ a { color: inherit; }
 .dash {
   display: flex;
   min-height: 100vh;
+  position: relative;
+  overflow: hidden;
 }
+
+.dash::before {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(124, 92, 252, 0.16), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(76, 224, 210, 0.10), transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dash::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sidebar, .main { position: relative; z-index: 1; }
 
 .sidebar {
   width: 240px;
   flex-shrink: 0;
-  background: var(--panel);
+  background: rgba(18, 21, 31, 0.7);
+  backdrop-filter: blur(10px);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -199,9 +233,11 @@ a { color: inherit; }
 .nav-group-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10.5px;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--cyan);
+  opacity: 0.85;
   padding: 14px 10px 6px;
 }
 
@@ -226,6 +262,7 @@ a { color: inherit; }
 .nav-item.active {
   background: var(--violet-soft);
   color: var(--text);
+  box-shadow: 0 0 0 1px rgba(124, 92, 252, 0.35), 0 0 16px rgba(124, 92, 252, 0.35);
 }
 
 .nav-item.active svg { opacity: 1; color: var(--violet); }
