@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
   <div class="dash">
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <div class="brand-mark">P</div>
-        <div class="brand-name">Panel</div>
+        <div class="brand-mark">Z</div>
+        <div class="brand-name">Zero-X</div>
       </div>
 
       <div class="nav-group-label">Main</div>
@@ -69,7 +71,7 @@
           </div>
           <div class="panel map-panel">
             <div class="map-shell" id="map-shell">
-              <canvas id="map-canvas"></canvas>
+              <div id="map-leaflet"></div>
               <div class="map-controls">
                 <button class="map-btn" id="map-zoom-in" title="Zoom in">+</button>
                 <button class="map-btn" id="map-zoom-out" title="Zoom out">−</button>
