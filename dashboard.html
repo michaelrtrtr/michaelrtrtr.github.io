@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard</title>
+  <title>Zero-X | Dashboard</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -19,6 +19,9 @@
       <div class="nav-group-label">Main</div>
       <div class="nav-item active" data-target="dashboard">
         <span data-icon="overview"></span><span>Dashboard</span>
+      </div>
+      <div class="nav-item" data-target="builder">
+        <span data-icon="builder"></span><span>Builder</span>
       </div>
       <div class="nav-item" data-target="account">
         <span data-icon="profile"></span><span>Account</span>
@@ -135,6 +138,32 @@
           </div>
         </section>
 
+        <!-- Builder -->
+        <section class="tab-panel" id="panel-builder">
+          <div class="hello">
+            <div class="eyebrow">Builder</div>
+            <h1>Build something</h1>
+            <p>Name it, build it, download it. This produces a real Windows .exe that shows "Hello, World!" in a window that fades away when you run it.</p>
+          </div>
+
+          <div class="panel">
+            <h3>Executable name</h3>
+            <p class="desc">What should the downloaded file be called?</p>
+            <div class="input-row">
+              <input type="text" class="text-input" id="builder-name" placeholder="myapp.exe" value="myapp.exe" />
+              <button class="btn primary" id="builder-build-btn">Build</button>
+              <button class="btn" id="builder-download-btn" disabled>Download</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Build log</h3>
+            <div class="build-log" id="build-log">
+              <div class="build-log-line muted">Waiting to build...</div>
+            </div>
+          </div>
+        </section>
+
         <!-- Automation -->
         <section class="tab-panel" id="panel-automation">
           <div class="hello">
@@ -206,6 +235,7 @@
   </div>
 
   <div class="toast" id="toast"></div>
+  <div class="run-banner" id="run-banner"></div>
 
   <script src="dashboard.js"></script>
 </body>
