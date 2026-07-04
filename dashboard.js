@@ -1,277 +1,327 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="dash">
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="brand-mark">P</div>
-        <div class="brand-name">Panel</div>
-      </div>
+const ICONS = {
+  overview: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>`,
+  profile: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 4.5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>`,
+  servers: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><circle cx="7" cy="7" r="0.8" fill="currentColor" stroke="none"/><circle cx="7" cy="17" r="0.8" fill="currentColor" stroke="none"/></svg>`,
+  automation: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke-linejoin="round"/></svg>`,
+  logs: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7M9 8h3"/></svg>`,
+  settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l2-1.5-2-3.4-2.4.7a8.06 8.06 0 0 0-1.7-1L15 3h-4l-.3 2.4a8.06 8.06 0 0 0-1.7 1l-2.4-.7-2 3.4L6.6 11a7.97 7.97 0 0 0 0 2l-2 1.5 2 3.4 2.4-.7a8.06 8.06 0 0 0 1.7 1L11 21h4l.3-2.4a8.06 8.06 0 0 0 1.7-1l2.4.7 2-3.4-2-1.6Z"/></svg>`,
+  logout: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>`,
+  "discord-mark": `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.492c-1.53-.69-3.17-1.2-4.885-1.49a.075.075 0 0 0-.079.036c-.21.369-.444.85-.608 1.23a18.566 18.566 0 0 0-5.487 0 12.36 12.36 0 0 0-.617-1.23A.077.077 0 0 0 8.562 3c-1.714.29-3.354.8-4.885 1.491a.07.07 0 0 0-.032.027C.533 9.093-.32 13.555.099 17.961a.08.08 0 0 0 .031.055 20.03 20.03 0 0 0 5.993 2.98.078.078 0 0 0 .084-.026 13.83 13.83 0 0 0 1.226-1.963.074.074 0 0 0-.041-.104 13.201 13.201 0 0 1-1.872-.878.075.075 0 0 1-.008-.125c.126-.093.252-.19.372-.287a.075.075 0 0 1 .078-.01c3.927 1.764 8.18 1.764 12.061 0a.075.075 0 0 1 .079.009c.12.098.246.195.373.288a.075.075 0 0 1-.006.125c-.598.344-1.22.635-1.873.877a.075.075 0 0 0-.04.105c.36.687.772 1.341 1.225 1.962a.077.077 0 0 0 .084.028 19.963 19.963 0 0 0 6.002-2.981.076.076 0 0 0 .032-.054c.5-5.094-.838-9.52-3.549-13.442a.06.06 0 0 0-.031-.028Z"/></svg>`,
+};
 
-      <div class="nav-group-label">Main</div>
-      <div class="nav-item active" data-target="overview">
-        <span data-icon="overview"></span><span>Overview</span>
-      </div>
-      <div class="nav-item" data-target="profile">
-        <span data-icon="profile"></span><span>Profile</span>
-      </div>
-      <div class="nav-item" data-target="map">
-        <span data-icon="servers"></span><span>Map</span>
-      </div>
-      <div class="nav-item" data-target="account">
-        <span data-icon="profile"></span><span>Account</span>
-      </div>
-      <div class="nav-item" data-target="social">
-        <span data-icon="automation"></span><span>Social</span>
-      </div>
+let profile = { username: "", handle: "", avatar: "", id: "" };
 
-      <div class="nav-group-label">Manage</div>
-      <div class="nav-item" data-target="automation">
-        <span data-icon="automation"></span><span>Automation</span>
-      </div>
-      <div class="nav-item" data-target="logs">
-        <span data-icon="logs"></span><span>Logs</span>
-      </div>
-      <div class="nav-item" data-target="settings">
-        <span data-icon="settings"></span><span>Settings</span>
-      </div>
+function applyIcons() {
+  document.querySelectorAll("[data-icon]").forEach((el) => {
+    el.innerHTML = ICONS[el.dataset.icon] || "";
+  });
+}
 
-      <div class="sidebar-foot">
-        <div class="nav-item logout-item" id="logout-item">
-          <span data-icon="logout"></span><span>Log out</span>
-        </div>
-      </div>
-    </aside>
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.remove("show"), 1800);
+}
 
-    <main class="main">
-      <div class="topbar">
-        <h2 id="panel-title">Overview</h2>
-        <div class="user-chip">
-          <img id="chip-avatar" src="" alt="Your avatar" />
-          <div>
-            <div class="name" id="chip-name">—</div>
-            <div class="tag" id="chip-tag">—</div>
-          </div>
-        </div>
-      </div>
+function loadProfile() {
+  const params = new URLSearchParams(window.location.search);
+  const username = params.get("username");
 
-      <div class="content">
+  if (!username) {
+    window.location.href = "index.html";
+    return;
+  }
 
-        <!-- Overview -->
-        <section class="tab-panel active" id="panel-overview">
-          <div class="hello">
-            <div class="eyebrow">Welcome back</div>
-            <h1 id="hello-name">—</h1>
-            <p>Here's a snapshot of your panel. Everything below is a placeholder for now.</p>
-          </div>
+  profile = {
+    username,
+    handle: params.get("handle") || username,
+    avatar: params.get("avatar") || "https://cdn.discordapp.com/embed/avatars/0.png",
+    id: params.get("id") || "—",
+  };
 
-          <div class="grid">
-            <div class="stat-card">
-              <div class="label">Connected servers</div>
-              <div class="value violet">0</div>
-            </div>
-            <div class="stat-card">
-              <div class="label">Active automations</div>
-              <div class="value cyan">0</div>
-            </div>
-            <div class="stat-card">
-              <div class="label">Events logged</div>
-              <div class="value">0</div>
-            </div>
-          </div>
+  renderProfile();
+}
 
-          <div class="panel">
-            <h3>Quick actions</h3>
-            <p class="desc">These aren't wired up to anything yet — just placeholders for now.</p>
-            <div class="action-row">
-              <button class="btn primary" data-inert>Add a server</button>
-              <button class="btn" data-inert>Create automation</button>
-              <button class="btn" data-inert>View logs</button>
-              <button class="btn danger" data-inert>Reset panel</button>
-            </div>
-          </div>
+function renderProfile() {
+  document.getElementById("chip-avatar").src = profile.avatar;
+  document.getElementById("chip-name").textContent = profile.username;
+  document.getElementById("chip-tag").textContent = "@" + profile.handle;
+  document.getElementById("hello-name").textContent = profile.username;
 
-          <div class="panel">
-            <h3>Recent activity</h3>
-            <p class="desc">Nothing here yet — this will fill in once things are connected.</p>
-          </div>
-        </section>
+  document.getElementById("profile-avatar").src = profile.avatar;
+  document.getElementById("profile-name").textContent = profile.username;
+  document.getElementById("profile-handle").textContent = "@" + profile.handle;
+  document.getElementById("profile-id").textContent = profile.id;
 
-        <!-- Profile -->
-        <section class="tab-panel" id="panel-profile">
-          <div class="hello">
-            <div class="eyebrow">Profile</div>
-            <h1>Your Discord identity</h1>
-            <p>Pulled straight from Discord when you signed in.</p>
-          </div>
-          <div class="panel account-card">
-            <img id="profile-avatar" src="" alt="Avatar" />
-            <div>
-              <div class="name" id="profile-name">—</div>
-              <div class="handle" id="profile-handle">—</div>
-              <div class="id-row"><span class="id-pill" id="profile-id">—</span></div>
-            </div>
-          </div>
-          <div class="panel">
-            <h3>Roles &amp; badges</h3>
-            <p class="desc">Not connected to anything yet — this is just a placeholder for later.</p>
-          </div>
-        </section>
+  document.getElementById("account-avatar").src = profile.avatar;
+  document.getElementById("account-name").textContent = profile.username;
+  document.getElementById("account-handle").textContent = "@" + profile.handle;
+  document.getElementById("account-id").textContent = profile.id;
+}
 
-        <!-- Map -->
-        <section class="tab-panel" id="panel-map">
-          <div class="hello">
-            <div class="eyebrow">Network map</div>
-            <h1>Node overview</h1>
-            <p>Drag to pan, scroll (or use the buttons) to zoom. Purely visual for now.</p>
-          </div>
-          <div class="panel map-panel">
-            <div class="map-shell" id="map-shell">
-              <canvas id="map-canvas"></canvas>
-              <div class="map-controls">
-                <button class="map-btn" id="map-zoom-in" title="Zoom in">+</button>
-                <button class="map-btn" id="map-zoom-out" title="Zoom out">−</button>
-                <button class="map-btn" id="map-reset" title="Reset view">⤾</button>
-              </div>
-              <div class="map-hint">drag to pan · scroll to zoom</div>
-            </div>
-          </div>
-        </section>
+function wireNav() {
+  const items = document.querySelectorAll(".nav-item[data-target]");
+  items.forEach((item) => {
+    item.addEventListener("click", () => {
+      items.forEach((i) => i.classList.remove("active"));
+      item.classList.add("active");
 
-        <!-- Account -->
-        <section class="tab-panel" id="panel-account">
-          <div class="hello">
-            <div class="eyebrow">Account</div>
-            <h1>Manage your account</h1>
-            <p>A few things you can actually do right now.</p>
-          </div>
+      document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+      const target = document.getElementById("panel-" + item.dataset.target);
+      if (target) target.classList.add("active");
 
-          <div class="panel account-card">
-            <img id="account-avatar" src="" alt="Avatar" />
-            <div>
-              <div class="name" id="account-name">—</div>
-              <div class="handle" id="account-handle">—</div>
-              <div class="id-row">
-                <span class="id-pill" id="account-id">—</span>
-                <button class="btn" id="copy-id-btn">Copy ID</button>
-              </div>
-            </div>
-          </div>
+      const label = item.querySelector("span:last-child").textContent;
+      document.getElementById("panel-title").textContent = label;
 
-          <div class="panel">
-            <h3>Display name override</h3>
-            <p class="desc">Changes how your name shows across the panel. Local to this session only.</p>
-            <div class="input-row">
-              <input type="text" class="text-input" id="nickname-input" placeholder="Enter a display name" />
-              <button class="btn primary" id="nickname-apply">Apply</button>
-            </div>
-          </div>
+      if (item.dataset.target === "map") {
+        requestAnimationFrame(() => window.__mapWidget && window.__mapWidget.resize());
+      }
+    });
+  });
+}
 
-          <div class="panel">
-            <h3>Session</h3>
-            <p class="desc">Signs you out and sends you back to the login page.</p>
-            <div class="action-row">
-              <button class="btn danger" id="account-logout-btn">Log out</button>
-            </div>
-          </div>
-        </section>
+function wireButtons() {
+  document.querySelectorAll(".btn[data-inert]").forEach((btn) => {
+    btn.addEventListener("click", () => showToast("This button doesn't do anything yet"));
+  });
 
-        <!-- Social -->
-        <section class="tab-panel" id="panel-social">
-          <div class="hello">
-            <div class="eyebrow">Social</div>
-            <h1>Find us elsewhere</h1>
-            <p>Links to where people can reach the community.</p>
-          </div>
+  document.getElementById("logout-item").addEventListener("click", () => {
+    window.location.href = "index.html";
+  });
 
-          <div class="panel social-card">
-            <div class="social-icon" data-icon="discord-mark"></div>
-            <div>
-              <div class="name" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;">Discord server</div>
-              <div class="handle" style="margin-bottom:12px;">Join to chat, get updates, and ask questions.</div>
-              <a class="join-btn" href="https://discord.gg/ud48XJHepX" target="_blank" rel="noopener">Join server</a>
-            </div>
-          </div>
-        </section>
+  document.getElementById("account-logout-btn").addEventListener("click", () => {
+    window.location.href = "index.html";
+  });
 
-        <!-- Automation -->
-        <section class="tab-panel" id="panel-automation">
-          <div class="hello">
-            <div class="eyebrow">Automation</div>
-            <h1>Automations</h1>
-            <p>Nothing set up yet.</p>
-          </div>
-          <div class="panel">
-            <h3>Create an automation</h3>
-            <p class="desc">Not wired up yet — placeholder for now.</p>
-            <div class="action-row">
-              <button class="btn primary" data-inert>New automation</button>
-            </div>
-          </div>
-        </section>
+  document.getElementById("copy-id-btn").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(profile.id);
+      showToast("Copied ID to clipboard");
+    } catch {
+      showToast("Couldn't copy — copy it manually");
+    }
+  });
 
-        <!-- Logs -->
-        <section class="tab-panel" id="panel-logs">
-          <div class="hello">
-            <div class="eyebrow">Logs</div>
-            <h1>Activity logs</h1>
-            <p>Nothing has been logged yet.</p>
-          </div>
-          <div class="panel">
-            <p class="desc">Once things are connected, events will show up here.</p>
-          </div>
-        </section>
+  document.getElementById("nickname-apply").addEventListener("click", () => {
+    const val = document.getElementById("nickname-input").value.trim();
+    if (!val) {
+      showToast("Type a name first");
+      return;
+    }
+    profile.username = val;
+    renderProfile();
+    showToast("Display name updated for this session");
+  });
+}
 
-        <!-- Settings -->
-        <section class="tab-panel" id="panel-settings">
-          <div class="hello">
-            <div class="eyebrow">Settings</div>
-            <h1>Panel settings</h1>
-            <p>These actually work — try them out.</p>
-          </div>
+function wireSettings() {
+  document.querySelectorAll(".swatch").forEach((sw) => {
+    sw.addEventListener("click", () => {
+      document.querySelectorAll(".swatch").forEach((s) => s.classList.remove("selected"));
+      sw.classList.add("selected");
+      const color = sw.dataset.color;
+      document.documentElement.style.setProperty("--violet", color);
+      document.documentElement.style.setProperty("--violet-soft", color + "24");
+      showToast("Accent color updated");
+    });
+  });
 
-          <div class="panel">
-            <h3>Accent color</h3>
-            <p class="desc">Changes the highlight color used across the panel.</p>
-            <div class="swatch-row">
-              <div class="swatch selected" style="background:#7c5cfc" data-color="#7c5cfc" title="Violet"></div>
-              <div class="swatch" style="background:#4ce0d2" data-color="#4ce0d2" title="Cyan"></div>
-              <div class="swatch" style="background:#ff6b6b" data-color="#ff6b6b" title="Red"></div>
-              <div class="swatch" style="background:#ffb84d" data-color="#ffb84d" title="Amber"></div>
-              <div class="swatch" style="background:#4dff88" data-color="#4dff88" title="Green"></div>
-            </div>
-          </div>
+  const compactToggle = document.getElementById("toggle-compact");
+  compactToggle.addEventListener("click", () => {
+    compactToggle.classList.toggle("on");
+    document.getElementById("sidebar").classList.toggle("compact");
+  });
 
-          <div class="panel">
-            <div class="field-row">
-              <div>
-                <div class="field-label">Compact sidebar</div>
-                <div class="field-desc">Collapse the sidebar to icons only.</div>
-              </div>
-              <div class="switch" id="toggle-compact"></div>
-            </div>
-            <div class="field-row">
-              <div>
-                <div class="field-label">Reduce motion</div>
-                <div class="field-desc">Turns off hover and transition animations.</div>
-              </div>
-              <div class="switch" id="toggle-motion"></div>
-            </div>
-          </div>
-        </section>
+  const motionToggle = document.getElementById("toggle-motion");
+  motionToggle.addEventListener("click", () => {
+    motionToggle.classList.toggle("on");
+    document.body.classList.toggle("motion-off");
+  });
+}
 
-      </div>
-    </main>
-  </div>
+function initMap() {
+  const canvas = document.getElementById("map-canvas");
+  const shell = document.getElementById("map-shell");
+  const ctx = canvas.getContext("2d");
 
-  <div class="toast" id="toast"></div>
+  const nodes = [
+    { x: 0, y: 0, label: "Core" },
+    { x: 180, y: -90, label: "Node A" },
+    { x: -160, y: -60, label: "Node B" },
+    { x: 120, y: 130, label: "Node C" },
+    { x: -190, y: 110, label: "Node D" },
+    { x: 40, y: -180, label: "Node E" },
+    { x: -60, y: 190, label: "Node F" },
+  ];
 
-  <script src="dashboard.js"></script>
-</body>
-</html>
+  const links = [
+    [0, 1], [0, 2], [0, 3], [0, 4], [1, 5], [3, 6],
+  ];
+
+  let scale = 1;
+  let offsetX = 0;
+  let offsetY = 0;
+  let dragging = false;
+  let lastX = 0;
+  let lastY = 0;
+  let dpr = window.devicePixelRatio || 1;
+
+  function resize() {
+    const rect = shell.getBoundingClientRect();
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = rect.width + "px";
+    canvas.style.height = rect.height + "px";
+    draw();
+  }
+
+  function worldToScreen(x, y) {
+    const rect = shell.getBoundingClientRect();
+    return {
+      x: (rect.width / 2) + (x + offsetX) * scale,
+      y: (rect.height / 2) + (y + offsetY) * scale,
+    };
+  }
+
+  function draw() {
+    const rect = shell.getBoundingClientRect();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    // grid
+    const gridSize = 40 * scale;
+    const originX = (rect.width / 2) + (offsetX * scale) % gridSize;
+    const originY = (rect.height / 2) + (offsetY * scale) % gridSize;
+    ctx.fillStyle = "rgba(124, 92, 252, 0.14)";
+    for (let x = originX % gridSize; x < rect.width; x += gridSize) {
+      for (let y = originY % gridSize; y < rect.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.arc(x, y, 1.1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // links
+    ctx.strokeStyle = "rgba(124, 92, 252, 0.35)";
+    ctx.lineWidth = 1.4;
+    links.forEach(([a, b]) => {
+      const pa = worldToScreen(nodes[a].x, nodes[a].y);
+      const pb = worldToScreen(nodes[b].x, nodes[b].y);
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
+    });
+
+    // nodes
+    nodes.forEach((n, i) => {
+      const p = worldToScreen(n.x, n.y);
+      const r = (i === 0 ? 9 : 6) * Math.min(scale, 1.6);
+
+      const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 4);
+      glow.addColorStop(0, i === 0 ? "rgba(76, 224, 210, 0.5)" : "rgba(124, 92, 252, 0.45)");
+      glow.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r * 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = i === 0 ? "#4ce0d2" : "#7c5cfc";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(231, 233, 243, 0.85)";
+      ctx.font = "11px Inter, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(n.label, p.x, p.y - r - 8);
+    });
+  }
+
+  function zoomAt(factor, cx, cy) {
+    const rect = shell.getBoundingClientRect();
+    const before = { x: (cx - rect.width / 2) / scale - offsetX, y: (cy - rect.height / 2) / scale - offsetY };
+    scale = Math.min(3, Math.max(0.4, scale * factor));
+    const after = { x: (cx - rect.width / 2) / scale - offsetX, y: (cy - rect.height / 2) / scale - offsetY };
+    offsetX += after.x - before.x;
+    offsetY += after.y - before.y;
+    draw();
+  }
+
+  canvas.addEventListener("mousedown", (e) => {
+    dragging = true;
+    canvas.classList.add("grabbing");
+    lastX = e.clientX;
+    lastY = e.clientY;
+  });
+
+  window.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
+    offsetX += (e.clientX - lastX) / scale;
+    offsetY += (e.clientY - lastY) / scale;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    draw();
+  });
+
+  window.addEventListener("mouseup", () => {
+    dragging = false;
+    canvas.classList.remove("grabbing");
+  });
+
+  canvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const rect = shell.getBoundingClientRect();
+    const factor = e.deltaY < 0 ? 1.12 : 0.89;
+    zoomAt(factor, e.clientX - rect.left, e.clientY - rect.top);
+  }, { passive: false });
+
+  canvas.addEventListener("touchstart", (e) => {
+    if (e.touches.length === 1) {
+      dragging = true;
+      lastX = e.touches[0].clientX;
+      lastY = e.touches[0].clientY;
+    }
+  });
+
+  canvas.addEventListener("touchmove", (e) => {
+    if (!dragging || e.touches.length !== 1) return;
+    e.preventDefault();
+    offsetX += (e.touches[0].clientX - lastX) / scale;
+    offsetY += (e.touches[0].clientY - lastY) / scale;
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
+    draw();
+  }, { passive: false });
+
+  canvas.addEventListener("touchend", () => { dragging = false; });
+
+  document.getElementById("map-zoom-in").addEventListener("click", () => {
+    const rect = shell.getBoundingClientRect();
+    zoomAt(1.2, rect.width / 2, rect.height / 2);
+  });
+  document.getElementById("map-zoom-out").addEventListener("click", () => {
+    const rect = shell.getBoundingClientRect();
+    zoomAt(0.83, rect.width / 2, rect.height / 2);
+  });
+  document.getElementById("map-reset").addEventListener("click", () => {
+    scale = 1; offsetX = 0; offsetY = 0; draw();
+  });
+
+  window.addEventListener("resize", resize);
+  resize();
+
+  window.__mapWidget = { resize, draw };
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  applyIcons();
+  loadProfile();
+  wireNav();
+  wireButtons();
+  wireSettings();
+  initMap();
+});
