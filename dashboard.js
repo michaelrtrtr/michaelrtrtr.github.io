@@ -2,6 +2,7 @@ const ICONS = {
   overview: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>`,
   profile: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 4.5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>`,
   automation: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke-linejoin="round"/></svg>`,
+  builder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.7 6.3a4 4 0 0 1-5.34 5.34L4 17l3 3 5.36-5.36a4 4 0 0 1 5.34-5.34L21 6l-3-3-3.3 3.3Z" stroke-linejoin="round" stroke-linecap="round"/></svg>`,
   logs: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7M9 8h3"/></svg>`,
   settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l2-1.5-2-3.4-2.4.7a8.06 8.06 0 0 0-1.7-1L15 3h-4l-.3 2.4a8.06 8.06 0 0 0-1.7 1l-2.4-.7-2 3.4L6.6 11a7.97 7.97 0 0 0 0 2l-2 1.5 2 3.4 2.4-.7a8.06 8.06 0 0 0 1.7 1L11 21h4l.3-2.4a8.06 8.06 0 0 0 1.7-1l2.4.7 2-3.4-2-1.6Z"/></svg>`,
   logout: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>`,
@@ -165,7 +166,79 @@ function wireSettings() {
   }
 }
 
-function initMap() {
+function wireBuilder() {
+  const nameInput = $("builder-name");
+  const buildBtn = $("builder-build-btn");
+  const downloadBtn = $("builder-download-btn");
+  const log = $("build-log");
+  if (!nameInput || !buildBtn || !downloadBtn || !log) return;
+
+  let building = false;
+  let chosenName = "myapp.exe";
+
+  function addLine(text, cls) {
+    const line = document.createElement("div");
+    line.className = "build-log-line" + (cls ? " " + cls : "");
+    line.textContent = text;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function sanitizeName(raw) {
+    let name = (raw || "myapp.exe").trim().replace(/[\\/:*?"<>|]/g, "_");
+    if (!name) name = "myapp.exe";
+    if (!/\.exe$/i.test(name)) name += ".exe";
+    return name;
+  }
+
+  buildBtn.addEventListener("click", () => {
+    if (building) return;
+    chosenName = sanitizeName(nameInput.value);
+    building = true;
+    downloadBtn.disabled = true;
+    buildBtn.disabled = true;
+    log.innerHTML = "";
+
+    const steps = [
+      `Compiling sources for ${chosenName}...`,
+      `Linking objects...`,
+      `Packaging ${chosenName}...`,
+      `Build complete: ${chosenName}`,
+    ];
+
+    steps.forEach((text, i) => {
+      setTimeout(() => {
+        const isLast = i === steps.length - 1;
+        addLine(text, isLast ? "done" : "ok");
+        if (isLast) {
+          building = false;
+          buildBtn.disabled = false;
+          downloadBtn.disabled = false;
+          showToast(`${chosenName} is ready to download`);
+        }
+      }, (i + 1) * 550);
+    });
+  });
+
+  downloadBtn.addEventListener("click", async () => {
+    try {
+      const res = await fetch("template.exe");
+      if (!res.ok) throw new Error("template.exe not found");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = chosenName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast(`Downloading ${chosenName}`);
+    } catch (err) {
+      showToast("Couldn't find template.exe — make sure it's uploaded to your repo");
+    }
+  });
+}
   const shell = $("map-shell");
   const mapEl = $("map-leaflet");
   if (!shell || !mapEl || typeof L === "undefined") return;
@@ -214,5 +287,6 @@ document.addEventListener("DOMContentLoaded", () => {
   safeRun(wireNav, "wireNav");
   safeRun(wireButtons, "wireButtons");
   safeRun(wireSettings, "wireSettings");
+  safeRun(wireBuilder, "wireBuilder");
   safeRun(initMap, "initMap");
 });
