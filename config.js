@@ -6,7 +6,7 @@
 // 4. That's it — no client secret or backend needed for this flow.
 
 const DISCORD_CONFIG = {
-  clientId: "1511177342423138415",
+  clientId: "1510808228810981467",
   // Auto-matches whatever URL this page is actually running on,
   // so it works both locally and once you publish it.
   redirectUri: window.location.origin + window.location.pathname,
