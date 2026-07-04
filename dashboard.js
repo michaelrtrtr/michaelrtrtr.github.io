@@ -1,7 +1,6 @@
 const ICONS = {
   overview: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>`,
   profile: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.6-3.6 4.5-5.5 7.5-5.5s5.9 1.9 7.5 5.5"/></svg>`,
-  servers: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><circle cx="7" cy="7" r="0.8" fill="currentColor" stroke="none"/><circle cx="7" cy="17" r="0.8" fill="currentColor" stroke="none"/></svg>`,
   automation: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke-linejoin="round"/></svg>`,
   logs: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7M9 8h3"/></svg>`,
   settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l2-1.5-2-3.4-2.4.7a8.06 8.06 0 0 0-1.7-1L15 3h-4l-.3 2.4a8.06 8.06 0 0 0-1.7 1l-2.4-.7-2 3.4L6.6 11a7.97 7.97 0 0 0 0 2l-2 1.5 2 3.4 2.4-.7a8.06 8.06 0 0 0 1.7 1L11 21h4l.3-2.4a8.06 8.06 0 0 0 1.7-1l2.4.7 2-3.4-2-1.6Z"/></svg>`,
@@ -11,6 +10,20 @@ const ICONS = {
 
 let profile = { username: "", handle: "", avatar: "", id: "" };
 
+function $(id) {
+  return document.getElementById(id);
+}
+
+function setText(id, value) {
+  const el = $(id);
+  if (el) el.textContent = value;
+}
+
+function setSrc(id, value) {
+  const el = $(id);
+  if (el) el.src = value;
+}
+
 function applyIcons() {
   document.querySelectorAll("[data-icon]").forEach((el) => {
     el.innerHTML = ICONS[el.dataset.icon] || "";
@@ -18,7 +31,8 @@ function applyIcons() {
 }
 
 function showToast(message) {
-  const toast = document.getElementById("toast");
+  const toast = $("toast");
+  if (!toast) return;
   toast.textContent = message;
   toast.classList.add("show");
   clearTimeout(showToast._t);
@@ -45,20 +59,20 @@ function loadProfile() {
 }
 
 function renderProfile() {
-  document.getElementById("chip-avatar").src = profile.avatar;
-  document.getElementById("chip-name").textContent = profile.username;
-  document.getElementById("chip-tag").textContent = "@" + profile.handle;
-  document.getElementById("hello-name").textContent = profile.username;
+  setSrc("chip-avatar", profile.avatar);
+  setText("chip-name", profile.username);
+  setText("chip-tag", "@" + profile.handle);
+  setText("hello-name", "Welcome back, " + profile.username);
 
-  document.getElementById("profile-avatar").src = profile.avatar;
-  document.getElementById("profile-name").textContent = profile.username;
-  document.getElementById("profile-handle").textContent = "@" + profile.handle;
-  document.getElementById("profile-id").textContent = profile.id;
+  setSrc("profile-avatar", profile.avatar);
+  setText("profile-name", profile.username);
+  setText("profile-handle", "@" + profile.handle);
+  setText("profile-id", profile.id);
 
-  document.getElementById("account-avatar").src = profile.avatar;
-  document.getElementById("account-name").textContent = profile.username;
-  document.getElementById("account-handle").textContent = "@" + profile.handle;
-  document.getElementById("account-id").textContent = profile.id;
+  setSrc("account-avatar", profile.avatar);
+  setText("account-name", profile.username);
+  setText("account-handle", "@" + profile.handle);
+  setText("account-id", profile.id);
 }
 
 function wireNav() {
@@ -69,13 +83,13 @@ function wireNav() {
       item.classList.add("active");
 
       document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
-      const target = document.getElementById("panel-" + item.dataset.target);
+      const target = $("panel-" + item.dataset.target);
       if (target) target.classList.add("active");
 
-      const label = item.querySelector("span:last-child").textContent;
-      document.getElementById("panel-title").textContent = label;
+      const labelSpan = item.querySelector("span:last-child");
+      if (labelSpan) setText("panel-title", labelSpan.textContent);
 
-      if (item.dataset.target === "map") {
+      if (item.dataset.target === "dashboard") {
         requestAnimationFrame(() => window.__mapWidget && window.__mapWidget.resize());
       }
     });
@@ -87,33 +101,38 @@ function wireButtons() {
     btn.addEventListener("click", () => showToast("This button doesn't do anything yet"));
   });
 
-  document.getElementById("logout-item").addEventListener("click", () => {
-    window.location.href = "index.html";
-  });
+  const logoutItem = $("logout-item");
+  if (logoutItem) logoutItem.addEventListener("click", () => (window.location.href = "index.html"));
 
-  document.getElementById("account-logout-btn").addEventListener("click", () => {
-    window.location.href = "index.html";
-  });
+  const accountLogout = $("account-logout-btn");
+  if (accountLogout) accountLogout.addEventListener("click", () => (window.location.href = "index.html"));
 
-  document.getElementById("copy-id-btn").addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(profile.id);
-      showToast("Copied ID to clipboard");
-    } catch {
-      showToast("Couldn't copy — copy it manually");
-    }
-  });
+  const copyBtn = $("copy-id-btn");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(profile.id);
+        showToast("Copied ID to clipboard");
+      } catch {
+        showToast("Couldn't copy — copy it manually");
+      }
+    });
+  }
 
-  document.getElementById("nickname-apply").addEventListener("click", () => {
-    const val = document.getElementById("nickname-input").value.trim();
-    if (!val) {
-      showToast("Type a name first");
-      return;
-    }
-    profile.username = val;
-    renderProfile();
-    showToast("Display name updated for this session");
-  });
+  const applyBtn = $("nickname-apply");
+  if (applyBtn) {
+    applyBtn.addEventListener("click", () => {
+      const input = $("nickname-input");
+      const val = input ? input.value.trim() : "";
+      if (!val) {
+        showToast("Type a name first");
+        return;
+      }
+      profile.username = val;
+      renderProfile();
+      showToast("Display name updated for this session");
+    });
+  }
 }
 
 function wireSettings() {
@@ -128,22 +147,28 @@ function wireSettings() {
     });
   });
 
-  const compactToggle = document.getElementById("toggle-compact");
-  compactToggle.addEventListener("click", () => {
-    compactToggle.classList.toggle("on");
-    document.getElementById("sidebar").classList.toggle("compact");
-  });
+  const compactToggle = $("toggle-compact");
+  if (compactToggle) {
+    compactToggle.addEventListener("click", () => {
+      compactToggle.classList.toggle("on");
+      const sidebar = $("sidebar");
+      if (sidebar) sidebar.classList.toggle("compact");
+    });
+  }
 
-  const motionToggle = document.getElementById("toggle-motion");
-  motionToggle.addEventListener("click", () => {
-    motionToggle.classList.toggle("on");
-    document.body.classList.toggle("motion-off");
-  });
+  const motionToggle = $("toggle-motion");
+  if (motionToggle) {
+    motionToggle.addEventListener("click", () => {
+      motionToggle.classList.toggle("on");
+      document.body.classList.toggle("motion-off");
+    });
+  }
 }
 
 function initMap() {
-  const canvas = document.getElementById("map-canvas");
-  const shell = document.getElementById("map-shell");
+  const canvas = $("map-canvas");
+  const shell = $("map-shell");
+  if (!canvas || !shell) return;
   const ctx = canvas.getContext("2d");
 
   const nodes = [
@@ -191,7 +216,6 @@ function initMap() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, rect.width, rect.height);
 
-    // grid
     const gridSize = 40 * scale;
     const originX = (rect.width / 2) + (offsetX * scale) % gridSize;
     const originY = (rect.height / 2) + (offsetY * scale) % gridSize;
@@ -204,7 +228,6 @@ function initMap() {
       }
     }
 
-    // links
     ctx.strokeStyle = "rgba(124, 92, 252, 0.35)";
     ctx.lineWidth = 1.4;
     links.forEach(([a, b]) => {
@@ -216,7 +239,6 @@ function initMap() {
       ctx.stroke();
     });
 
-    // nodes
     nodes.forEach((n, i) => {
       const p = worldToScreen(n.x, n.y);
       const r = (i === 0 ? 9 : 6) * Math.min(scale, 1.6);
@@ -299,15 +321,20 @@ function initMap() {
 
   canvas.addEventListener("touchend", () => { dragging = false; });
 
-  document.getElementById("map-zoom-in").addEventListener("click", () => {
+  const zoomInBtn = $("map-zoom-in");
+  if (zoomInBtn) zoomInBtn.addEventListener("click", () => {
     const rect = shell.getBoundingClientRect();
     zoomAt(1.2, rect.width / 2, rect.height / 2);
   });
-  document.getElementById("map-zoom-out").addEventListener("click", () => {
+
+  const zoomOutBtn = $("map-zoom-out");
+  if (zoomOutBtn) zoomOutBtn.addEventListener("click", () => {
     const rect = shell.getBoundingClientRect();
     zoomAt(0.83, rect.width / 2, rect.height / 2);
   });
-  document.getElementById("map-reset").addEventListener("click", () => {
+
+  const resetBtn = $("map-reset");
+  if (resetBtn) resetBtn.addEventListener("click", () => {
     scale = 1; offsetX = 0; offsetY = 0; draw();
   });
 
@@ -317,11 +344,19 @@ function initMap() {
   window.__mapWidget = { resize, draw };
 }
 
+function safeRun(fn, label) {
+  try {
+    fn();
+  } catch (err) {
+    console.error(`[dashboard] ${label} failed:`, err);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  applyIcons();
-  loadProfile();
-  wireNav();
-  wireButtons();
-  wireSettings();
-  initMap();
+  safeRun(applyIcons, "applyIcons");
+  safeRun(loadProfile, "loadProfile");
+  safeRun(wireNav, "wireNav");
+  safeRun(wireButtons, "wireButtons");
+  safeRun(wireSettings, "wireSettings");
+  safeRun(initMap, "initMap");
 });
