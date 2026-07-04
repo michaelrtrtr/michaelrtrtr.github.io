@@ -166,182 +166,38 @@ function wireSettings() {
 }
 
 function initMap() {
-  const canvas = $("map-canvas");
   const shell = $("map-shell");
-  if (!canvas || !shell) return;
-  const ctx = canvas.getContext("2d");
+  const mapEl = $("map-leaflet");
+  if (!shell || !mapEl || typeof L === "undefined") return;
 
-  const nodes = [
-    { x: 0, y: 0, label: "Core" },
-    { x: 180, y: -90, label: "Node A" },
-    { x: -160, y: -60, label: "Node B" },
-    { x: 120, y: 130, label: "Node C" },
-    { x: -190, y: 110, label: "Node D" },
-    { x: 40, y: -180, label: "Node E" },
-    { x: -60, y: 190, label: "Node F" },
-  ];
-
-  const links = [
-    [0, 1], [0, 2], [0, 3], [0, 4], [1, 5], [3, 6],
-  ];
-
-  let scale = 1;
-  let offsetX = 0;
-  let offsetY = 0;
-  let dragging = false;
-  let lastX = 0;
-  let lastY = 0;
-  let dpr = window.devicePixelRatio || 1;
-
-  function resize() {
-    const rect = shell.getBoundingClientRect();
-    dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = rect.width + "px";
-    canvas.style.height = rect.height + "px";
-    draw();
-  }
-
-  function worldToScreen(x, y) {
-    const rect = shell.getBoundingClientRect();
-    return {
-      x: (rect.width / 2) + (x + offsetX) * scale,
-      y: (rect.height / 2) + (y + offsetY) * scale,
-    };
-  }
-
-  function draw() {
-    const rect = shell.getBoundingClientRect();
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, rect.width, rect.height);
-
-    const gridSize = 40 * scale;
-    const originX = (rect.width / 2) + (offsetX * scale) % gridSize;
-    const originY = (rect.height / 2) + (offsetY * scale) % gridSize;
-    ctx.fillStyle = "rgba(124, 92, 252, 0.14)";
-    for (let x = originX % gridSize; x < rect.width; x += gridSize) {
-      for (let y = originY % gridSize; y < rect.height; y += gridSize) {
-        ctx.beginPath();
-        ctx.arc(x, y, 1.1, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    ctx.strokeStyle = "rgba(124, 92, 252, 0.35)";
-    ctx.lineWidth = 1.4;
-    links.forEach(([a, b]) => {
-      const pa = worldToScreen(nodes[a].x, nodes[a].y);
-      const pb = worldToScreen(nodes[b].x, nodes[b].y);
-      ctx.beginPath();
-      ctx.moveTo(pa.x, pa.y);
-      ctx.lineTo(pb.x, pb.y);
-      ctx.stroke();
-    });
-
-    nodes.forEach((n, i) => {
-      const p = worldToScreen(n.x, n.y);
-      const r = (i === 0 ? 9 : 6) * Math.min(scale, 1.6);
-
-      const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 4);
-      glow.addColorStop(0, i === 0 ? "rgba(76, 224, 210, 0.5)" : "rgba(124, 92, 252, 0.45)");
-      glow.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = glow;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, r * 4, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = i === 0 ? "#4ce0d2" : "#7c5cfc";
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "rgba(231, 233, 243, 0.85)";
-      ctx.font = "11px Inter, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(n.label, p.x, p.y - r - 8);
-    });
-  }
-
-  function zoomAt(factor, cx, cy) {
-    const rect = shell.getBoundingClientRect();
-    const before = { x: (cx - rect.width / 2) / scale - offsetX, y: (cy - rect.height / 2) / scale - offsetY };
-    scale = Math.min(3, Math.max(0.4, scale * factor));
-    const after = { x: (cx - rect.width / 2) / scale - offsetX, y: (cy - rect.height / 2) / scale - offsetY };
-    offsetX += after.x - before.x;
-    offsetY += after.y - before.y;
-    draw();
-  }
-
-  canvas.addEventListener("mousedown", (e) => {
-    dragging = true;
-    canvas.classList.add("grabbing");
-    lastX = e.clientX;
-    lastY = e.clientY;
+  const map = L.map(mapEl, {
+    center: [20, 0],
+    zoom: 2.4,
+    zoomControl: false,
+    attributionControl: true,
+    worldCopyJump: true,
   });
 
-  window.addEventListener("mousemove", (e) => {
-    if (!dragging) return;
-    offsetX += (e.clientX - lastX) / scale;
-    offsetY += (e.clientY - lastY) / scale;
-    lastX = e.clientX;
-    lastY = e.clientY;
-    draw();
-  });
-
-  window.addEventListener("mouseup", () => {
-    dragging = false;
-    canvas.classList.remove("grabbing");
-  });
-
-  canvas.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    const rect = shell.getBoundingClientRect();
-    const factor = e.deltaY < 0 ? 1.12 : 0.89;
-    zoomAt(factor, e.clientX - rect.left, e.clientY - rect.top);
-  }, { passive: false });
-
-  canvas.addEventListener("touchstart", (e) => {
-    if (e.touches.length === 1) {
-      dragging = true;
-      lastX = e.touches[0].clientX;
-      lastY = e.touches[0].clientY;
-    }
-  });
-
-  canvas.addEventListener("touchmove", (e) => {
-    if (!dragging || e.touches.length !== 1) return;
-    e.preventDefault();
-    offsetX += (e.touches[0].clientX - lastX) / scale;
-    offsetY += (e.touches[0].clientY - lastY) / scale;
-    lastX = e.touches[0].clientX;
-    lastY = e.touches[0].clientY;
-    draw();
-  }, { passive: false });
-
-  canvas.addEventListener("touchend", () => { dragging = false; });
+  // CARTO's free dark basemap — no API key required.
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    subdomains: "abcd",
+    maxZoom: 19,
+  }).addTo(map);
 
   const zoomInBtn = $("map-zoom-in");
-  if (zoomInBtn) zoomInBtn.addEventListener("click", () => {
-    const rect = shell.getBoundingClientRect();
-    zoomAt(1.2, rect.width / 2, rect.height / 2);
-  });
+  if (zoomInBtn) zoomInBtn.addEventListener("click", () => map.zoomIn());
 
   const zoomOutBtn = $("map-zoom-out");
-  if (zoomOutBtn) zoomOutBtn.addEventListener("click", () => {
-    const rect = shell.getBoundingClientRect();
-    zoomAt(0.83, rect.width / 2, rect.height / 2);
-  });
+  if (zoomOutBtn) zoomOutBtn.addEventListener("click", () => map.zoomOut());
 
   const resetBtn = $("map-reset");
-  if (resetBtn) resetBtn.addEventListener("click", () => {
-    scale = 1; offsetX = 0; offsetY = 0; draw();
-  });
+  if (resetBtn) resetBtn.addEventListener("click", () => map.setView([20, 0], 2.4));
 
-  window.addEventListener("resize", resize);
-  resize();
-
-  window.__mapWidget = { resize, draw };
+  window.__mapWidget = {
+    resize: () => map.invalidateSize(),
+    draw: () => {},
+  };
 }
 
 function safeRun(fn, label) {
