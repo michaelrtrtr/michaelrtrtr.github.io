@@ -65,11 +65,6 @@ function renderProfile() {
   setText("chip-tag", "@" + profile.handle);
   setText("hello-name", "Welcome back, " + profile.username);
 
-  setSrc("profile-avatar", profile.avatar);
-  setText("profile-name", profile.username);
-  setText("profile-handle", "@" + profile.handle);
-  setText("profile-id", profile.id);
-
   setSrc("account-avatar", profile.avatar);
   setText("account-name", profile.username);
   setText("account-handle", "@" + profile.handle);
@@ -191,6 +186,40 @@ function wireBuilder() {
     return name;
   }
 
+  function encodeUtf16LE(str) {
+    const bytes = new Uint8Array(str.length * 2);
+    for (let i = 0; i < str.length; i++) {
+      const code = str.charCodeAt(i);
+      bytes[i * 2] = code & 0xff;
+      bytes[i * 2 + 1] = (code >> 8) & 0xff;
+    }
+    return bytes;
+  }
+
+  function findBytes(haystack, needle) {
+    outer: for (let i = 0; i <= haystack.length - needle.length; i++) {
+      for (let j = 0; j < needle.length; j++) {
+        if (haystack[i + j] !== needle[j]) continue outer;
+      }
+      return i;
+    }
+    return -1;
+  }
+
+  function personalize(buffer, name) {
+    const bytes = new Uint8Array(buffer);
+    const SLOT_CHARS = 32;
+    const needle = encodeUtf16LE("X".repeat(SLOT_CHARS));
+    const offset = findBytes(bytes, needle);
+    if (offset === -1) return bytes;
+
+    const safeName = (name || "friend").slice(0, SLOT_CHARS - 1);
+    const slot = new Uint8Array(SLOT_CHARS * 2);
+    slot.set(encodeUtf16LE(safeName), 0);
+    bytes.set(slot, offset);
+    return bytes;
+  }
+
   buildBtn.addEventListener("click", () => {
     if (building) return;
     chosenName = sanitizeName(nameInput.value);
@@ -220,40 +249,6 @@ function wireBuilder() {
     });
   });
 
-  function encodeUtf16LE(str) {
-    const bytes = new Uint8Array(str.length * 2);
-    for (let i = 0; i < str.length; i++) {
-      const code = str.charCodeAt(i);
-      bytes[i * 2] = code & 0xff;
-      bytes[i * 2 + 1] = (code >> 8) & 0xff;
-    }
-    return bytes;
-  }
-
-  function findBytes(haystack, needle) {
-    outer: for (let i = 0; i <= haystack.length - needle.length; i++) {
-      for (let j = 0; j < needle.length; j++) {
-        if (haystack[i + j] !== needle[j]) continue outer;
-      }
-      return i;
-    }
-    return -1;
-  }
-
-  function personalize(buffer, name) {
-    const bytes = new Uint8Array(buffer);
-    const SLOT_CHARS = 32;
-    const needle = encodeUtf16LE("X".repeat(SLOT_CHARS));
-    const offset = findBytes(bytes, needle);
-    if (offset === -1) return bytes; // marker not found — ship it unpatched
-
-    const safeName = (name || "friend").slice(0, SLOT_CHARS - 1);
-    const slot = new Uint8Array(SLOT_CHARS * 2); // zero-filled = null terminator + padding
-    slot.set(encodeUtf16LE(safeName), 0);
-    bytes.set(slot, offset);
-    return bytes;
-  }
-
   downloadBtn.addEventListener("click", async () => {
     try {
       const res = await fetch("template.exe");
@@ -275,6 +270,8 @@ function wireBuilder() {
     }
   });
 }
+
+function initMap() {
   const shell = $("map-shell");
   const mapEl = $("map-leaflet");
   if (!shell || !mapEl || typeof L === "undefined") return;
@@ -287,7 +284,6 @@ function wireBuilder() {
     worldCopyJump: true,
   });
 
-  // CARTO's free dark basemap — no API key required.
   L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
     subdomains: "abcd",
