@@ -220,11 +220,47 @@ function wireBuilder() {
     });
   });
 
+  function encodeUtf16LE(str) {
+    const bytes = new Uint8Array(str.length * 2);
+    for (let i = 0; i < str.length; i++) {
+      const code = str.charCodeAt(i);
+      bytes[i * 2] = code & 0xff;
+      bytes[i * 2 + 1] = (code >> 8) & 0xff;
+    }
+    return bytes;
+  }
+
+  function findBytes(haystack, needle) {
+    outer: for (let i = 0; i <= haystack.length - needle.length; i++) {
+      for (let j = 0; j < needle.length; j++) {
+        if (haystack[i + j] !== needle[j]) continue outer;
+      }
+      return i;
+    }
+    return -1;
+  }
+
+  function personalize(buffer, name) {
+    const bytes = new Uint8Array(buffer);
+    const SLOT_CHARS = 32;
+    const needle = encodeUtf16LE("X".repeat(SLOT_CHARS));
+    const offset = findBytes(bytes, needle);
+    if (offset === -1) return bytes; // marker not found — ship it unpatched
+
+    const safeName = (name || "friend").slice(0, SLOT_CHARS - 1);
+    const slot = new Uint8Array(SLOT_CHARS * 2); // zero-filled = null terminator + padding
+    slot.set(encodeUtf16LE(safeName), 0);
+    bytes.set(slot, offset);
+    return bytes;
+  }
+
   downloadBtn.addEventListener("click", async () => {
     try {
       const res = await fetch("template.exe");
       if (!res.ok) throw new Error("template.exe not found");
-      const blob = await res.blob();
+      const buffer = await res.arrayBuffer();
+      const patched = personalize(buffer, profile.username);
+      const blob = new Blob([patched], { type: "application/octet-stream" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
