@@ -15,14 +15,11 @@
       </div>
 
       <div class="nav-group-label">Main</div>
-      <div class="nav-item active" data-target="overview">
-        <span data-icon="overview"></span><span>Overview</span>
+      <div class="nav-item active" data-target="dashboard">
+        <span data-icon="overview"></span><span>Dashboard</span>
       </div>
       <div class="nav-item" data-target="profile">
         <span data-icon="profile"></span><span>Profile</span>
-      </div>
-      <div class="nav-item" data-target="map">
-        <span data-icon="servers"></span><span>Map</span>
       </div>
       <div class="nav-item" data-target="account">
         <span data-icon="profile"></span><span>Account</span>
@@ -51,7 +48,7 @@
 
     <main class="main">
       <div class="topbar">
-        <h2 id="panel-title">Overview</h2>
+        <h2 id="panel-title">Dashboard</h2>
         <div class="user-chip">
           <img id="chip-avatar" src="" alt="Your avatar" />
           <div>
@@ -63,43 +60,23 @@
 
       <div class="content">
 
-        <!-- Overview -->
-        <section class="tab-panel active" id="panel-overview">
+        <!-- Dashboard (map lives here now) -->
+        <section class="tab-panel active" id="panel-dashboard">
           <div class="hello">
-            <div class="eyebrow">Welcome back</div>
-            <h1 id="hello-name">—</h1>
-            <p>Here's a snapshot of your panel. Everything below is a placeholder for now.</p>
+            <div class="eyebrow">Dashboard</div>
+            <h1 id="hello-name">Welcome back</h1>
+            <p>Drag to pan, scroll (or use the buttons) to zoom. Purely visual for now.</p>
           </div>
-
-          <div class="grid">
-            <div class="stat-card">
-              <div class="label">Connected servers</div>
-              <div class="value violet">0</div>
+          <div class="panel map-panel">
+            <div class="map-shell" id="map-shell">
+              <canvas id="map-canvas"></canvas>
+              <div class="map-controls">
+                <button class="map-btn" id="map-zoom-in" title="Zoom in">+</button>
+                <button class="map-btn" id="map-zoom-out" title="Zoom out">−</button>
+                <button class="map-btn" id="map-reset" title="Reset view">⤾</button>
+              </div>
+              <div class="map-hint">drag to pan · scroll to zoom</div>
             </div>
-            <div class="stat-card">
-              <div class="label">Active automations</div>
-              <div class="value cyan">0</div>
-            </div>
-            <div class="stat-card">
-              <div class="label">Events logged</div>
-              <div class="value">0</div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <h3>Quick actions</h3>
-            <p class="desc">These aren't wired up to anything yet — just placeholders for now.</p>
-            <div class="action-row">
-              <button class="btn primary" data-inert>Add a server</button>
-              <button class="btn" data-inert>Create automation</button>
-              <button class="btn" data-inert>View logs</button>
-              <button class="btn danger" data-inert>Reset panel</button>
-            </div>
-          </div>
-
-          <div class="panel">
-            <h3>Recent activity</h3>
-            <p class="desc">Nothing here yet — this will fill in once things are connected.</p>
           </div>
         </section>
 
@@ -121,26 +98,6 @@
           <div class="panel">
             <h3>Roles &amp; badges</h3>
             <p class="desc">Not connected to anything yet — this is just a placeholder for later.</p>
-          </div>
-        </section>
-
-        <!-- Map -->
-        <section class="tab-panel" id="panel-map">
-          <div class="hello">
-            <div class="eyebrow">Network map</div>
-            <h1>Node overview</h1>
-            <p>Drag to pan, scroll (or use the buttons) to zoom. Purely visual for now.</p>
-          </div>
-          <div class="panel map-panel">
-            <div class="map-shell" id="map-shell">
-              <canvas id="map-canvas"></canvas>
-              <div class="map-controls">
-                <button class="map-btn" id="map-zoom-in" title="Zoom in">+</button>
-                <button class="map-btn" id="map-zoom-out" title="Zoom out">−</button>
-                <button class="map-btn" id="map-reset" title="Reset view">⤾</button>
-              </div>
-              <div class="map-hint">drag to pan · scroll to zoom</div>
-            </div>
           </div>
         </section>
 
