@@ -61,13 +61,12 @@
       </div>
 
       <div class="content">
-
-        <!-- Dashboard (map lives here now) -->
+        <!-- Dashboard -->
         <section class="tab-panel active" id="panel-dashboard">
           <div class="hello">
             <div class="eyebrow">Dashboard</div>
             <h1 id="hello-name">Welcome back</h1>
-            <p>Drag to pan, scroll (or use the buttons) to zoom. Purely visual for now.</p>
+            <p>Drag to pan, scroll (or use the buttons) to zoom.</p>
           </div>
           <div class="panel map-panel">
             <div class="map-shell" id="map-shell">
@@ -78,6 +77,32 @@
                 <button class="map-btn" id="map-reset" title="Reset view">⤾</button>
               </div>
               <div class="map-hint">drag to pan · scroll to zoom</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Builder -->
+        <section class="tab-panel" id="panel-builder">
+          <div class="hello">
+            <div class="eyebrow">Builder</div>
+            <h1>Build something</h1>
+            <p>Name it, build it, download it. This produces a real Windows .exe with your name baked in.</p>
+          </div>
+
+          <div class="panel">
+            <h3>Executable name</h3>
+            <p class="desc">What should the downloaded file be called?</p>
+            <div class="input-row">
+              <input type="text" class="text-input" id="builder-name" placeholder="myapp.exe" value="myapp.exe" />
+              <button class="btn primary" id="builder-build-btn">Build</button>
+              <button class="btn" id="builder-download-btn" disabled>Download</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Build log</h3>
+            <div class="build-log" id="build-log">
+              <div class="build-log-line muted">Waiting to build...</div>
             </div>
           </div>
         </section>
@@ -134,32 +159,6 @@
               <div class="name" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;">Discord server</div>
               <div class="handle" style="margin-bottom:12px;">Join to chat, get updates, and ask questions.</div>
               <a class="join-btn" href="https://discord.gg/ud48XJHepX" target="_blank" rel="noopener">Join server</a>
-            </div>
-          </div>
-        </section>
-
-        <!-- Builder -->
-        <section class="tab-panel" id="panel-builder">
-          <div class="hello">
-            <div class="eyebrow">Builder</div>
-            <h1>Build something</h1>
-            <p>Name it, build it, download it. This produces a real Windows .exe that shows "Hello, World!" in a window that fades away when you run it.</p>
-          </div>
-
-          <div class="panel">
-            <h3>Executable name</h3>
-            <p class="desc">What should the downloaded file be called?</p>
-            <div class="input-row">
-              <input type="text" class="text-input" id="builder-name" placeholder="myapp.exe" value="myapp.exe" />
-              <button class="btn primary" id="builder-build-btn">Build</button>
-              <button class="btn" id="builder-download-btn" disabled>Download</button>
-            </div>
-          </div>
-
-          <div class="panel">
-            <h3>Build log</h3>
-            <div class="build-log" id="build-log">
-              <div class="build-log-line muted">Waiting to build...</div>
             </div>
           </div>
         </section>
@@ -229,7 +228,6 @@
             </div>
           </div>
         </section>
-
       </div>
     </main>
   </div>
