@@ -82,6 +82,9 @@ function wireNav() {
       if (labelSpan) setText("panel-title", labelSpan.textContent);
       if (item.dataset.target === "dashboard") {
         requestAnimationFrame(() => window.__mapWidget && window.__mapWidget.resize());
+        // Reload map pins every time you navigate to dashboard
+        const savedTok = localStorage.getItem("zx_gh_token");
+        if (savedTok && window.__reloadMapHits) window.__reloadMapHits(savedTok);
       }
       if (item.dataset.target === "users" && window.loadUsers) {
         window.loadUsers();
@@ -444,12 +447,12 @@ function wireUsers() {
 
   async function removeUser(issueNumber) {
     const token = localStorage.getItem("zx_gh_token");
-    if (!token) return;
+    if (!token) { showToast("No token saved"); return; }
     const btn = document.querySelector(`[data-issue="${issueNumber}"]`);
     if (btn) { btn.disabled = true; btn.textContent = "Removing..."; }
     const repo = "michaelrtrtr/michaelrtrtr.github.io";
     try {
-      await fetch(`https://api.github.com/repos/${repo}/issues/${issueNumber}`, {
+      const resp = await fetch(`https://api.github.com/repos/${repo}/issues/${issueNumber}`, {
         method: "PATCH",
         headers: {
           Authorization: `token ${token}`,
@@ -458,20 +461,24 @@ function wireUsers() {
         },
         body: JSON.stringify({ state: "closed" }),
       });
-      // Remove row from table
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        showToast("GitHub error: " + (err.message || resp.status));
+        if (btn) { btn.disabled = false; btn.textContent = "Remove"; }
+        return;
+      }
+      // Only remove from UI if API confirmed success
       const row = $("user-row-" + issueNumber);
       if (row) row.remove();
-      // Remove pin from map
       if (window.__markers && window.__markers[issueNumber]) {
         window.__markers[issueNumber].remove();
         delete window.__markers[issueNumber];
       }
-      // Update count
       const remaining = document.querySelectorAll("#users-tbody tr").length;
       if (countEl) countEl.textContent = remaining ? "· " + remaining + " user" + (remaining !== 1 ? "s" : "") : "";
-      showToast("Removed from map and list");
+      showToast("Removed from map and list ✓");
     } catch (err) {
-      showToast("Failed to remove");
+      showToast("Network error — try again");
       if (btn) { btn.disabled = false; btn.textContent = "Remove"; }
     }
   }
