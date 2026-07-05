@@ -288,10 +288,14 @@ function initMap() {
   const map = L.map(mapEl, {
     center: [20, 0],
     zoom: 2,
+    minZoom: 1,
     zoomControl: false,
     attributionControl: true,
     worldCopyJump: true,
   });
+
+  // Fix black area — force correct size after render
+  setTimeout(() => map.invalidateSize(), 100);
 
   L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
