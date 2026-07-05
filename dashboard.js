@@ -312,50 +312,9 @@ function initMap() {
     popupAnchor: [0, -40],
   });
 
-  // Purple/violet pin — for YOUR own location
-  const youIcon = L.divIcon({
-    className: "",
-    html: `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="46" viewBox="0 0 28 38">
-      <path fill="#7c5cfc" stroke="#fff" stroke-width="1.5"
-        d="M14 1C7.4 1 2 6.4 2 13c0 8 12 24 12 24s12-16 12-24C26 6.4 20.6 1 14 1z"/>
-      <circle fill="#fff" cx="14" cy="13" r="5"/>
-    </svg>`,
-    iconSize: [34, 46],
-    iconAnchor: [17, 46],
-    popupAnchor: [0, -48],
-  });
 
-  // ----- Show YOUR current location via IP geolocation -----
-  fetch("https://ipapi.co/json/")
-    .then(r => r.json())
-    .then(data => {
-      const lat = parseFloat(data.latitude);
-      const lon = parseFloat(data.longitude);
-      if (isNaN(lat) || isNaN(lon)) return;
 
-      const marker = L.marker([lat, lon], { icon: youIcon, zIndexOffset: 1000 }).addTo(map);
-      marker.bindPopup(`
-        <div style="background:#0d1017;color:#e7e9f3;padding:12px 14px;border-radius:8px;
-          font-family:'JetBrains Mono',monospace;font-size:12px;min-width:200px;">
-          <div style="color:#7c5cfc;font-weight:700;font-size:13px;margin-bottom:6px;">
-            📍 You &nbsp;·&nbsp; ${data.ip || "Unknown"}
-          </div>
-          <div style="color:#4ce0d2;margin-bottom:4px;">
-            ${data.city || "—"}, ${data.region || "—"}, ${data.country_name || "—"}
-          </div>
-          <div style="color:#7b8094;font-size:11px;">
-            ${lat.toFixed(4)}, ${lon.toFixed(4)}
-          </div>
-        </div>
-      `).openPopup();
 
-      // Fly to your location on load
-      map.setView([lat, lon], 5, { animate: true });
-    })
-    .catch(() => {
-      // Fallback: just show world view
-      map.setView([20, 0], 2);
-    });
 
   // ----- Load exe hits from GitHub issues -----
   function loadHits(token) {
@@ -405,13 +364,7 @@ function initMap() {
   const resetBtn   = $("map-reset");
   if (zoomInBtn)  zoomInBtn.addEventListener("click",  () => map.zoomIn());
   if (zoomOutBtn) zoomOutBtn.addEventListener("click", () => map.zoomOut());
-  if (resetBtn)   resetBtn.addEventListener("click",   () => {
-    // Reset back to your own location or world view
-    fetch("https://ipapi.co/json/")
-      .then(r => r.json())
-      .then(d => map.setView([parseFloat(d.latitude), parseFloat(d.longitude)], 5, { animate: true }))
-      .catch(() => map.setView([20, 0], 2, { animate: true }));
-  });
+  if (resetBtn)   resetBtn.addEventListener("click",   () => map.setView([20, 0], 2, { animate: true }));
 
   window.__mapWidget = { resize: () => map.invalidateSize() };
 }
