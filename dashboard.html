@@ -90,11 +90,11 @@
           </div>
 
           <div class="panel">
-            <h3>Firebase URL</h3>
-            <p class="desc">This is where hits get stored. Paste your Firebase Realtime Database URL here (e.g. <code style="color:var(--cyan);font-size:11px;">yourproject-default-rtdb.firebaseio.com</code>). Without this, the exe won't report back.</p>
+            <h3>GitHub Token</h3>
+            <p class="desc">Go to <strong>github.com/settings/tokens</strong> → Generate new token (classic) → check only <strong>public_repo</strong> → copy it. Paste it here — this lets the exe report hits back to your map.</p>
             <div class="input-row">
-              <input type="text" class="text-input" id="firebase-url" placeholder="yourproject-default-rtdb.firebaseio.com" style="min-width:320px;" />
-              <button class="btn" id="firebase-save-btn">Save</button>
+              <input type="password" class="text-input" id="gh-token" placeholder="github_pat_..." style="min-width:280px;" />
+              <button class="btn" id="gh-save-btn">Save</button>
             </div>
           </div>
 
