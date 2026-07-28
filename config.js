@@ -1,16 +1,19 @@
-// ---- Discord OAuth config ----
-// 1. Go to https://discord.com/developers/applications and create an application.
-// 2. Copy its "Client ID" (OAuth2 tab) and paste it below.
-// 3. In the OAuth2 > Redirects section, add the exact URL of your login page
-//    (e.g. https://yourusername.github.io/index.html) and save.
-// 4. That's it — no client secret or backend needed for this flow.
-
+// ── Discord OAuth ─────────────────────────────────────────────────────────────
+// Same as before — fill in your Discord app's Client ID
 const DISCORD_CONFIG = {
   clientId: "1510808228810981467",
-  // Fixed on purpose — this must be the EXACT string you add under
-  // OAuth2 > Redirects in the Discord Developer Portal. Don't let it
-  // auto-detect the URL, or "www vs no-www" / trailing-slash mismatches
-  // will randomly break login.
   redirectUri: "https://michaelrtrtr.github.io/",
   scope: "identify",
+};
+
+// ── Firebase ──────────────────────────────────────────────────────────────────
+// 1. Go to console.firebase.google.com → create a project (free Spark plan)
+// 2. Add a Realtime Database (Start in test mode for now)
+// 3. Project Settings → Service Accounts → Database Secrets → Show → copy it
+// 4. Your DB URL is shown on the Realtime Database page (looks like
+//    https://your-project-default-rtdb.firebaseio.com)
+// Paste both below:
+const FIREBASE_CONFIG = {
+  dbUrl:   "",   // e.g.  https://zero-x-a1b2c3-default-rtdb.firebaseio.com
+  secret:  "",   // your database secret (legacy token, still works)
 };
