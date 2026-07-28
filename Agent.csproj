@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      WinExe = no console window ever spawns, even for a split second.
+      Console = would flash a black box on launch.
+    -->
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>template</AssemblyName>
+    <RootNamespace>ZeroX</RootNamespace>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+
+    <!-- Single-file, self-contained (no .NET install needed on victim) -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+    <!--
+      Trimming is DISABLED — WinForms uses heavy reflection internally and
+      .NET 8 explicitly blocks trimming with WinForms (NETSDK1175).
+      Size reduction comes from IncludeNativeLibrariesForSelfExtract instead.
+    -->
+    <PublishTrimmed>false</PublishTrimmed>
+
+    <!--
+      Packs native runtime DLLs into the single exe rather than extracting
+      them to a temp folder on first run — cleaner, no disk artifacts.
+    -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+
+    <!-- Strip PDB / debug symbols — shaves a few MB and reduces forensic surface -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+
+    <!-- Blank version fields — nothing shows in Properties > Details tab -->
+    <ApplicationIcon />
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <InformationalVersion>1.0.0</InformationalVersion>
+    <Product></Product>
+    <Company></Company>
+    <Copyright></Copyright>
+    <Description></Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
+  </ItemGroup>
+
+</Project>
